@@ -23,8 +23,8 @@ const Footer = async () => {
   return (
     <footer className="container mx-auto bg-[#062215] text-white">
       {/* Main Footer */}
-      <div className="mx-auto max-w-360 px-6 py-16 lg:px-10">
-        <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mx-auto max-w-360 px-4 py-12 sm:px-6 sm:py-16 lg:px-10">
+        <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 sm:gap-12 lg:grid-cols-4">
           {/* Brand Section */}
           <div className="space-y-5">
             <Link href="/" className="inline-block">
@@ -35,7 +35,7 @@ const Footer = async () => {
                   width={155}
                   height={50}
                   priority
-                  className="h-auto w-36.25 object-contain"
+                  className="h-auto w-30 object-contain sm:w-36.25"
                 />
               </h2>
             </Link>
@@ -150,7 +150,7 @@ const Footer = async () => {
                 href="https://facebook.com"
                 target="_blank"
                 aria-label="Facebook"
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 transition hover:border-lime-400 hover:bg-lime-400 hover:text-green-950"
+                className="flex h-9 w-9 items-center justify-center rounded-full sm:h-10 sm:w-10 border border-white/20 transition hover:border-lime-400 hover:bg-lime-400 hover:text-green-950"
               >
                 <FaFacebookSquare size={18} />
               </Link>
@@ -159,7 +159,7 @@ const Footer = async () => {
                 href="https://youtube.com"
                 target="_blank"
                 aria-label="YouTube"
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 transition hover:border-lime-400 hover:bg-lime-400 hover:text-green-950"
+                className="flex h-9 w-9 items-center justify-center rounded-full sm:h-10 sm:w-10 border border-white/20 transition hover:border-lime-400 hover:bg-lime-400 hover:text-green-950"
               >
                 <FaYoutube size={18} />
               </Link>
@@ -168,7 +168,7 @@ const Footer = async () => {
                 href="https://linkedin.com"
                 target="_blank"
                 aria-label="LinkedIn"
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 transition hover:border-lime-400 hover:bg-lime-400 hover:text-green-950"
+                className="flex h-9 w-9 items-center justify-center rounded-full sm:h-10 sm:w-10 border border-white/20 transition hover:border-lime-400 hover:bg-lime-400 hover:text-green-950"
               >
                 <FaLinkedin size={18} />
               </Link>
@@ -177,7 +177,7 @@ const Footer = async () => {
                 href="https://x.com"
                 target="_blank"
                 aria-label="X"
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 text-sm font-bold transition hover:border-lime-400 hover:bg-lime-400 hover:text-green-950"
+                className="flex h-9 w-9 items-center justify-center rounded-full sm:h-10 sm:w-10 border border-white/20 text-sm font-bold transition hover:border-lime-400 hover:bg-lime-400 hover:text-green-950"
               >
                 𝕏
               </Link>
@@ -188,10 +188,10 @@ const Footer = async () => {
 
       {/* Bottom Footer */}
       <div className="border-t border-white/10">
-        <div className="mx-auto flex max-w-360 flex-col items-center justify-between gap-4 px-6 py-6 text-sm text-gray-400 md:flex-row lg:px-10">
+        <div className="mx-auto flex max-w-360 flex-col items-center justify-between gap-4 px-4 py-6 text-center text-sm text-gray-400 sm:px-6 md:flex-row md:text-left lg:px-10">
           <p>© {year} . All rights reserved.</p>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center justify-center gap-3 md:justify-end">
             <Link
               href="/privacy-policy"
               className="transition hover:text-lime-400"

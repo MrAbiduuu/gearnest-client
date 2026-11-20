@@ -56,24 +56,24 @@ const categories: Category[] = [
 
 const PopularCategories = () => {
   return (
-    <section className="w-full bg-white py-16 lg:py-20">
-      <div className="mx-auto max-w-360 px-6 lg:px-12">
+    <section className="w-full bg-white py-12 sm:py-16 lg:py-20">
+      <div className="mx-auto max-w-360 px-4 sm:px-6 lg:px-12">
         <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-extrabold tracking-tight text-[#17251C] sm:text-4xl">
+          <h2 className="text-2xl font-extrabold tracking-tight text-[#17251C] sm:text-3xl lg:text-4xl">
             Popular Categories
           </h2>
 
-          <p className="mt-4 text-base leading-7 text-gray-600 sm:text-lg">
+          <p className="mt-3 text-sm leading-6 text-gray-600 sm:mt-4 sm:text-base sm:leading-7 lg:text-lg">
             Explore verified equipment categories from our real-time database
           </p>
         </div>
 
-        <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-10 grid gap-4 sm:mt-12 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
           {categories.map(({ name, description, itemCount, icon: Icon }) => (
             <Link
               key={name}
               href={`/equipment?category=${encodeURIComponent(name)}`}
-              className="group flex h-full flex-col rounded-2xl border border-green-100 bg-[#F8FAF8] p-6 transition duration-300 hover:-translate-y-1 hover:border-lime-400 hover:bg-white hover:shadow-[0_18px_40px_-24px_rgba(22,101,52,0.55)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-700"
+              className="group flex h-full flex-col rounded-2xl border border-green-100 bg-[#F8FAF8] p-5 transition duration-300 hover:-translate-y-1 hover:border-lime-400 hover:bg-white hover:shadow-[0_18px_40px_-24px_rgba(22,101,52,0.55)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-700 sm:p-6"
             >
               <div className="flex items-start justify-between gap-4">
                 <span className="flex size-12 items-center justify-center rounded-xl bg-lime-100 text-green-700 transition-colors duration-300 group-hover:bg-green-700 group-hover:text-white">
@@ -85,7 +85,7 @@ const PopularCategories = () => {
                 </span>
               </div>
 
-              <h3 className="mt-6 text-xl font-bold text-[#17251C] transition-colors duration-300 group-hover:text-green-700">
+              <h3 className="mt-5 text-lg font-bold text-[#17251C] transition-colors duration-300 group-hover:text-green-700 sm:mt-6 sm:text-xl">
                 {name}
               </h3>
 
