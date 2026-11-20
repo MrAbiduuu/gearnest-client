@@ -15,9 +15,10 @@ import {
 import { authClient } from "@/lib/auth-client";
 import { getEmailError, getPasswordError } from "@/lib/auth-validation";
 import { toast } from "@/components/ui/toast";
+import Image from "next/image";
 
 const inputClassName =
-  "h-12 w-full rounded-xl border border-[#DCE5DC] bg-white px-4 text-sm text-[#17251C] outline-none transition placeholder:text-[#A1AAA3] focus:border-green-600 focus:ring-4 focus:ring-green-600/10";
+  "h-12 w-full rounded-xl border border-border bg-card px-4 text-sm text-foreground outline-none transition placeholder:text-muted-foreground focus:border-green-600 focus:ring-4 focus:ring-green-600/10";
 
 const SignInPage = () => {
   const router = useRouter();
@@ -96,7 +97,9 @@ const SignInPage = () => {
       }
     } catch (error) {
       showError(
-        error instanceof Error ? error.message : "Unable to continue with Google.",
+        error instanceof Error
+          ? error.message
+          : "Unable to continue with Google.",
         "Google sign-in failed",
       );
     } finally {
@@ -105,8 +108,8 @@ const SignInPage = () => {
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#F8FAF8] px-4 py-8 sm:px-6 sm:py-12">
-      <div className="grid w-full max-w-5xl overflow-hidden rounded-3xl border border-[#DCE5DC] bg-white shadow-[0_30px_90px_-45px_rgba(18,61,41,0.55)] lg:grid-cols-2">
+    <main className="flex min-h-screen items-center justify-center bg-background px-4 py-8 sm:px-6 sm:py-12">
+      <div className="grid w-full max-w-5xl overflow-hidden rounded-3xl border border-border bg-card shadow-[0_30px_90px_-45px_rgba(18,61,41,0.55)] lg:grid-cols-2">
         {/* LEFT BRAND PANEL */}
         <section className="relative hidden flex-col justify-between overflow-hidden bg-[#123D29] px-10 py-10 text-white lg:flex xl:px-14">
           <div className="absolute -right-40 -top-40 h-100 w-100 rounded-full border border-white/10" />
@@ -192,20 +195,21 @@ const SignInPage = () => {
                 <Package size={23} />
               </div>
 
-              <span className="text-2xl font-extrabold tracking-tight text-[#17251C]">
-                Gear<span className="text-green-700">Nest</span>
+              <span className="text-2xl font-extrabold tracking-tight text-foreground">
+                Gear
+                <span className="text-green-700 dark:text-lime-400">Nest</span>
               </span>
             </Link>
 
-            <p className="text-sm font-bold uppercase tracking-[0.15em] text-green-700">
+            <p className="text-sm font-bold uppercase tracking-[0.15em] text-green-700 dark:text-lime-400">
               Welcome Back
             </p>
 
-            <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-[#17251C] sm:text-4xl">
+            <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
               Sign in to your account
             </h2>
 
-            <p className="mt-4 text-sm leading-7 text-[#647067]">
+            <p className="mt-4 text-sm leading-7 text-muted-foreground">
               Welcome back! Please enter your details to access your GearNest
               account.
             </p>
@@ -214,25 +218,32 @@ const SignInPage = () => {
               type="button"
               disabled={isSubmitting}
               onClick={handleGoogleSignIn}
-              className="mt-8 flex h-12 w-full items-center justify-center gap-3 rounded-xl border border-[#DCE5DC] bg-white text-sm font-semibold text-[#26352A] transition hover:border-green-300 hover:bg-green-50/50 disabled:cursor-not-allowed disabled:opacity-60"
+              className="mt-8 flex h-12 w-full items-center justify-center gap-3 rounded-xl border border-border bg-card text-sm font-semibold text-foreground transition hover:border-green-300 hover:bg-green-50/50 disabled:cursor-not-allowed disabled:opacity-60 dark:hover:bg-green-900/30"
             >
-              <span className="text-xl font-bold text-[#4285F4]">G</span>
+              <Image
+                src="/icons8-google-48.png"
+                alt="Google"
+                width={20}
+                height={20}
+                priority
+                className="h-5 w-5 object-contain"
+              />
               Continue with Google
             </button>
 
             <div className="my-7 flex items-center gap-4">
-              <div className="h-px flex-1 bg-[#E2E9E2]" />
-              <span className="text-xs font-medium text-[#929D94]">
+              <div className="h-px flex-1 bg-border" />
+              <span className="text-xs font-medium text-muted-foreground">
                 OR CONTINUE WITH EMAIL
               </span>
-              <div className="h-px flex-1 bg-[#E2E9E2]" />
+              <div className="h-px flex-1 bg-border" />
             </div>
 
             <form className="space-y-5" onSubmit={handleSubmit} noValidate>
               <div>
                 <label
                   htmlFor="email"
-                  className="mb-2 block text-sm font-semibold text-[#26352A]"
+                  className="mb-2 block text-sm font-semibold text-foreground"
                 >
                   Email address
                 </label>
@@ -252,7 +263,7 @@ const SignInPage = () => {
               <div>
                 <label
                   htmlFor="password"
-                  className="mb-2 block text-sm font-semibold text-[#26352A]"
+                  className="mb-2 block text-sm font-semibold text-foreground"
                 >
                   Password
                 </label>
@@ -272,8 +283,10 @@ const SignInPage = () => {
                   <button
                     type="button"
                     onClick={() => setShowPassword((visible) => !visible)}
-                    aria-label={showPassword ? "Hide password" : "Show password"}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-[#849087] transition hover:text-green-700"
+                    aria-label={
+                      showPassword ? "Hide password" : "Show password"
+                    }
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground transition hover:text-green-700 dark:hover:text-lime-300"
                   >
                     {showPassword ? <EyeOff size={19} /> : <Eye size={19} />}
                   </button>
@@ -281,23 +294,23 @@ const SignInPage = () => {
               </div>
 
               <div className="flex items-center justify-between pt-1">
-                <label className="flex cursor-pointer items-center gap-2.5 text-sm text-[#647067]">
+                <label className="flex cursor-pointer items-center gap-2.5 text-sm text-muted-foreground">
                   <input
                     type="checkbox"
                     checked={rememberMe}
                     onChange={(event) => setRememberMe(event.target.checked)}
-                    className="h-4 w-4 rounded border-[#CBD5CB] accent-green-700"
+                    className="h-4 w-4 rounded border-border accent-green-700"
                   />
                   Remember me
                 </label>
 
-                <span className="text-xs font-medium text-[#A1AAA3]">
+                <span className="text-xs font-medium text-muted-foreground">
                   Forgot password?
                 </span>
               </div>
 
               {formError && (
-                <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
+                <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300">
                   {formError}
                 </p>
               )}
@@ -315,17 +328,17 @@ const SignInPage = () => {
               </button>
             </form>
 
-            <p className="mt-8 text-center text-sm text-[#647067]">
+            <p className="mt-8 text-center text-sm text-muted-foreground">
               Don&apos;t have an account?{" "}
               <Link
                 href="/signup"
-                className="font-bold text-green-700 transition hover:text-green-900"
+                className="font-bold text-green-700 transition hover:text-green-900 dark:text-lime-400 dark:hover:text-lime-300"
               >
                 Create an account
               </Link>
             </p>
 
-            <div className="mt-10 flex items-center justify-center gap-2 text-xs text-[#9AA49B]">
+            <div className="mt-10 flex items-center justify-center gap-2 text-xs text-muted-foreground">
               <ShieldCheck size={15} />
               Your rental journey starts here.
             </div>

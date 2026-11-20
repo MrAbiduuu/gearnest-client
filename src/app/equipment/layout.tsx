@@ -1,7 +1,5 @@
-import React from "react";
-
-const EquipmentsLayoutPage = () => {
-  return <div></div>;
+const EquipmentsLayoutPage = ({ children }: LayoutProps<"/equipment">) => {
+  return <div>{children}</div>;
 };
 
 export default EquipmentsLayoutPage;

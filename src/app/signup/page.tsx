@@ -21,9 +21,10 @@ import {
 } from "@/lib/auth-validation";
 import { uploadImageToImgBb } from "@/lib/imgbb";
 import { toast } from "@/components/ui/toast";
+import Image from "next/image";
 
 const inputClassName =
-  "h-12 w-full rounded-xl border border-[#DCE5DC] bg-white px-4 text-sm text-[#17251C] outline-none transition placeholder:text-[#A1AAA3] focus:border-green-600 focus:ring-4 focus:ring-green-600/10";
+  "h-12 w-full rounded-xl border border-border bg-card px-4 text-sm text-foreground outline-none transition placeholder:text-muted-foreground focus:border-green-600 focus:ring-4 focus:ring-green-600/10";
 
 const SignUpPage = () => {
   const router = useRouter();
@@ -117,7 +118,9 @@ const SignUpPage = () => {
       router.refresh();
     } catch (error) {
       showError(
-        error instanceof Error ? error.message : "Unable to register right now.",
+        error instanceof Error
+          ? error.message
+          : "Unable to register right now.",
       );
     } finally {
       setIsSubmitting(false);
@@ -142,7 +145,9 @@ const SignUpPage = () => {
       }
     } catch (error) {
       showError(
-        error instanceof Error ? error.message : "Unable to continue with Google.",
+        error instanceof Error
+          ? error.message
+          : "Unable to continue with Google.",
         "Google sign-up failed",
       );
     } finally {
@@ -151,8 +156,8 @@ const SignUpPage = () => {
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#F8FAF8] px-4 py-8 sm:px-6 sm:py-12">
-      <div className="grid w-full max-w-5xl overflow-hidden rounded-3xl border border-[#DCE5DC] bg-white shadow-[0_30px_90px_-45px_rgba(18,61,41,0.55)] lg:grid-cols-2">
+    <main className="flex min-h-screen items-center justify-center bg-background px-4 py-8 sm:px-6 sm:py-12">
+      <div className="grid w-full max-w-5xl overflow-hidden rounded-3xl border border-border bg-card shadow-[0_30px_90px_-45px_rgba(18,61,41,0.55)] lg:grid-cols-2">
         {/* LEFT BRAND PANEL */}
         <section className="relative hidden flex-col justify-between overflow-hidden bg-[#123D29] px-10 py-10 text-white lg:flex xl:px-14">
           <div className="absolute -right-40 -top-40 h-100 w-100 rounded-full border border-white/10" />
@@ -217,20 +222,21 @@ const SignUpPage = () => {
                 <Package size={23} />
               </div>
 
-              <span className="text-2xl font-extrabold tracking-tight text-[#17251C]">
-                Gear<span className="text-green-700">Nest</span>
+              <span className="text-2xl font-extrabold tracking-tight text-foreground">
+                Gear
+                <span className="text-green-700 dark:text-lime-400">Nest</span>
               </span>
             </Link>
 
-            <p className="text-sm font-bold uppercase tracking-[0.15em] text-green-700">
+            <p className="text-sm font-bold uppercase tracking-[0.15em] text-green-700 dark:text-lime-400">
               Get Started Today
             </p>
 
-            <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-[#17251C] sm:text-4xl">
+            <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
               Create your account
             </h2>
 
-            <p className="mt-4 text-sm leading-7 text-[#647067]">
+            <p className="mt-4 text-sm leading-7 text-muted-foreground">
               Join GearNest and make your next project easier. It only takes a
               moment to get started.
             </p>
@@ -239,25 +245,32 @@ const SignUpPage = () => {
               type="button"
               disabled={isSubmitting}
               onClick={handleGoogleSignUp}
-              className="mt-7 flex h-12 w-full items-center justify-center gap-3 rounded-xl border border-[#DCE5DC] bg-white text-sm font-semibold text-[#26352A] transition hover:border-green-300 hover:bg-green-50/50 disabled:cursor-not-allowed disabled:opacity-60"
+              className="mt-7 flex h-12 w-full items-center justify-center gap-3 rounded-xl border border-border bg-card text-sm font-semibold text-foreground transition hover:border-green-300 hover:bg-green-50/50 disabled:cursor-not-allowed disabled:opacity-60 dark:hover:bg-green-900/30"
             >
-              <span className="text-xl font-bold text-[#4285F4]">G</span>
+              <Image
+                src="/icons8-google-48.png"
+                alt="Google"
+                width={20}
+                height={20}
+                priority
+                className="h-5 w-5 object-contain"
+              />
               Sign up with Google
             </button>
 
             <div className="my-6 flex items-center gap-4">
-              <div className="h-px flex-1 bg-[#E2E9E2]" />
-              <span className="text-xs font-medium text-[#929D94]">
+              <div className="h-px flex-1 bg-border" />
+              <span className="text-xs font-medium text-muted-foreground">
                 OR REGISTER WITH EMAIL
               </span>
-              <div className="h-px flex-1 bg-[#E2E9E2]" />
+              <div className="h-px flex-1 bg-border" />
             </div>
 
             <form className="space-y-4" onSubmit={handleSubmit} noValidate>
               <div>
                 <label
                   htmlFor="name"
-                  className="mb-2 block text-sm font-semibold text-[#26352A]"
+                  className="mb-2 block text-sm font-semibold text-foreground"
                 >
                   Full name
                 </label>
@@ -277,7 +290,7 @@ const SignUpPage = () => {
               <div>
                 <label
                   htmlFor="email"
-                  className="mb-2 block text-sm font-semibold text-[#26352A]"
+                  className="mb-2 block text-sm font-semibold text-foreground"
                 >
                   Email address
                 </label>
@@ -297,7 +310,7 @@ const SignUpPage = () => {
               <div>
                 <label
                   htmlFor="photo-url"
-                  className="mb-2 block text-sm font-semibold text-[#26352A]"
+                  className="mb-2 block text-sm font-semibold text-foreground"
                 >
                   Profile photo
                 </label>
@@ -314,17 +327,19 @@ const SignUpPage = () => {
 
                 <label
                   htmlFor="photo-file"
-                  className="mt-3 flex min-h-12 cursor-pointer items-center gap-3 rounded-xl border border-dashed border-[#CBD8CB] bg-white px-4 py-3 transition hover:border-green-500 hover:bg-green-50/30"
+                  className="mt-3 flex min-h-12 cursor-pointer items-center gap-3 rounded-xl border border-dashed border-border bg-card px-4 py-3 transition hover:border-green-500 hover:bg-green-50/30 dark:hover:bg-green-900/20"
                 >
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#ECFCCB] text-[#166534]">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#ECFCCB] text-[#166534] dark:bg-green-900/40 dark:text-lime-300">
                     <Camera size={19} />
                   </div>
 
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium text-[#26352A]">
-                      {isUploading ? "Uploading photo..." : "Or upload to ImgBB"}
+                    <p className="truncate text-sm font-medium text-foreground">
+                      {isUploading
+                        ? "Uploading photo..."
+                        : "Or upload to ImgBB"}
                     </p>
-                    <p className="mt-0.5 text-xs text-[#929D94]">
+                    <p className="mt-0.5 text-xs text-muted-foreground">
                       PNG, JPG or JPEG
                     </p>
                   </div>
@@ -341,7 +356,7 @@ const SignUpPage = () => {
                 />
 
                 {photoUrl && (
-                  <p className="mt-2 truncate text-xs text-green-700">
+                  <p className="mt-2 truncate text-xs text-green-700 dark:text-lime-400">
                     Photo link ready: {photoUrl}
                   </p>
                 )}
@@ -350,7 +365,7 @@ const SignUpPage = () => {
               <div>
                 <label
                   htmlFor="password"
-                  className="mb-2 block text-sm font-semibold text-[#26352A]"
+                  className="mb-2 block text-sm font-semibold text-foreground"
                 >
                   Password
                 </label>
@@ -370,21 +385,23 @@ const SignUpPage = () => {
                   <button
                     type="button"
                     onClick={() => setShowPassword((visible) => !visible)}
-                    aria-label={showPassword ? "Hide password" : "Show password"}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-[#849087] transition hover:text-green-700"
+                    aria-label={
+                      showPassword ? "Hide password" : "Show password"
+                    }
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground transition hover:text-green-700 dark:hover:text-lime-300"
                   >
                     {showPassword ? <EyeOff size={19} /> : <Eye size={19} />}
                   </button>
                 </div>
 
-                <p className="mt-2 text-xs leading-5 text-[#929D94]">
+                <p className="mt-2 text-xs leading-5 text-muted-foreground">
                   At least 6 characters, including uppercase and lowercase
                   letters.
                 </p>
               </div>
 
               {formError && (
-                <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
+                <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300">
                   {formError}
                 </p>
               )}
@@ -402,30 +419,32 @@ const SignUpPage = () => {
               </button>
             </form>
 
-            <p className="mt-7 text-center text-sm text-[#647067]">
+            <p className="mt-7 text-center text-sm text-muted-foreground">
               Already have an account?{" "}
               <Link
                 href="/signin"
-                className="font-bold text-green-700 transition hover:text-green-900"
+                className="font-bold text-green-700 transition hover:text-green-900 dark:text-lime-400 dark:hover:text-lime-300"
               >
                 Sign in
               </Link>
             </p>
 
-            <div className="mt-8 flex items-start gap-3 rounded-xl border border-[#E2E9E2] bg-white p-4">
-              <div className="mt-0.5 text-green-700">
+            <div className="mt-8 flex items-start gap-3 rounded-xl border border-border bg-card p-4">
+              <div className="mt-0.5 text-green-700 dark:text-lime-400">
                 <ShieldCheck size={19} />
               </div>
 
-              <p className="text-xs leading-6 text-[#647067]">
+              <p className="text-xs leading-6 text-muted-foreground">
                 New accounts are registered with the{" "}
-                <span className="font-bold text-[#166534]">Customer</span> role
-                by default. You can explore GearNest and manage your rentals
-                after signing in.
+                <span className="font-bold text-[#166534] dark:text-lime-300">
+                  Customer
+                </span>{" "}
+                role by default. You can explore GearNest and manage your
+                rentals after signing in.
               </p>
             </div>
 
-            <div className="mt-8 flex items-center justify-center gap-2 text-xs text-[#9AA49B]">
+            <div className="mt-8 flex items-center justify-center gap-2 text-xs text-muted-foreground">
               <UserPlus size={15} />
               Join the GearNest community
             </div>

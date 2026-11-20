@@ -41,20 +41,20 @@ const HowItWorks = () => {
   return (
     <section
       id="how-it-works"
-      className="border-t border-[#E8EDE7] bg-white px-6 py-20 lg:px-12 lg:py-24"
+      className="border-t border-border bg-card px-6 py-20 lg:px-12 lg:py-24"
     >
       <div className="mx-auto max-w-7xl">
         {/* Section heading */}
         <div className="mx-auto mb-16 max-w-2xl text-center">
-          <span className="inline-flex items-center rounded-full border border-green-200 bg-green-50 px-4 py-2 text-xs font-bold uppercase tracking-[0.15em] text-green-800">
+          <span className="inline-flex items-center rounded-full border border-green-200 bg-green-50 px-4 py-2 text-xs font-bold uppercase tracking-[0.15em] text-green-800 dark:border-green-800 dark:bg-green-900/40 dark:text-lime-200">
             Simple & Convenient
           </span>
 
-          <h2 className="mt-5 text-3xl font-extrabold tracking-tight text-[#17251C] sm:text-4xl lg:text-[42px]">
-            How It <span className="text-green-700">Works</span>
+          <h2 className="mt-5 text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl lg:text-[42px]">
+            How It <span className="text-green-700 dark:text-lime-400">Works</span>
           </h2>
 
-          <p className="mt-4 text-base leading-8 text-[#647067]">
+          <p className="mt-4 text-base leading-8 text-muted-foreground">
             Getting the equipment you need has never been easier. Follow these
             four simple steps and get started with GearNest.
           </p>
@@ -63,7 +63,7 @@ const HowItWorks = () => {
         {/* Steps */}
         <div className="relative grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {/* Connecting line on desktop */}
-          <div className="absolute left-[12%] right-[12%] top-10 hidden border-t-2 border-dashed border-[#DCE8D5] lg:block" />
+          <div className="absolute left-[12%] right-[12%] top-10 hidden border-t-2 border-dashed border-border lg:block" />
 
           {steps.map((step) => {
             const Icon = step.icon;
@@ -71,27 +71,27 @@ const HowItWorks = () => {
             return (
               <div
                 key={step.number}
-                className="group relative rounded-2xl border border-[#E2E9E2] bg-[#F8FAF8] p-7 transition-all duration-300 hover:-translate-y-2 hover:border-green-200 hover:bg-white hover:shadow-xl hover:shadow-green-900/5"
+                className="group relative rounded-2xl border border-border bg-background p-7 transition-all duration-300 hover:-translate-y-2 hover:border-green-400 hover:bg-card hover:shadow-xl hover:shadow-green-900/5 dark:hover:bg-green-950/30"
               >
                 {/* Icon */}
-                <div className="relative z-10 flex h-20 w-20 items-center justify-center rounded-2xl border border-[#DCE8D5] bg-white text-[#166534] shadow-sm transition-all duration-300 group-hover:border-[#166534] group-hover:bg-[#166534] group-hover:text-white">
+                <div className="relative z-10 flex h-20 w-20 items-center justify-center rounded-2xl border border-border bg-card text-[#166534] shadow-sm transition-all duration-300 group-hover:border-[#166534] group-hover:bg-[#166534] group-hover:text-white dark:text-lime-300">
                   <Icon size={30} strokeWidth={1.7} />
                 </div>
 
                 {/* Step number */}
                 <div className="mt-7 flex items-center justify-between">
-                  <span className="text-xs font-bold uppercase tracking-[0.16em] text-green-700">
+                  <span className="text-xs font-bold uppercase tracking-[0.16em] text-green-700 dark:text-lime-400">
                     Step {step.number}
                   </span>
 
-                  <span className="h-px flex-1 bg-[#E2E9E2] ml-4" />
+                  <span className="h-px flex-1 bg-border ml-4" />
                 </div>
 
-                <h3 className="mt-4 text-xl font-bold text-[#17251C]">
+                <h3 className="mt-4 text-xl font-bold text-foreground">
                   {step.title}
                 </h3>
 
-                <p className="mt-3 text-sm leading-7 text-[#647067]">
+                <p className="mt-3 text-sm leading-7 text-muted-foreground">
                   {step.description}
                 </p>
               </div>

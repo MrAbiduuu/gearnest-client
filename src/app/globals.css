@@ -1,11 +1,13 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@plugin "daisyui";
 
 @custom-variant dark (&:is(.dark *));
 
 /* GearNest Theme Variables */
 
 :root {
+  color-scheme: light;
   --radius: 0.75rem;
 
   --background: #f8faf8;
@@ -40,6 +42,45 @@
   --chart-3: #0f766e;
   --chart-4: #a3a3a3;
   --chart-5: #ca8a04;
+}
+
+/* GearNest Dark Theme */
+
+.dark {
+  color-scheme: dark;
+
+  --background: #0b1410;
+  --foreground: #e8f2ea;
+
+  --card: #101d16;
+  --card-foreground: #e8f2ea;
+
+  --popover: #101d16;
+  --popover-foreground: #e8f2ea;
+
+  --primary: #86efac;
+  --primary-foreground: #052e16;
+
+  --secondary: #1a2e21;
+  --secondary-foreground: #d9f99d;
+
+  --muted: #15241a;
+  --muted-foreground: #9baea0;
+
+  --accent: #a3e635;
+  --accent-foreground: #052e16;
+
+  --destructive: #f87171;
+
+  --border: #233a2b;
+  --input: #233a2b;
+  --ring: #a3e635;
+
+  --chart-1: #86efac;
+  --chart-2: #bef264;
+  --chart-3: #2dd4bf;
+  --chart-4: #a3a3a3;
+  --chart-5: #facc15;
 }
 
 /* Tailwind Theme Mapping */

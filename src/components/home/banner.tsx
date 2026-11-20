@@ -6,23 +6,23 @@ import { FaArrowRight } from "react-icons/fa";
 
 const HomeBanner = () => {
   return (
-    <section className="w-full overflow-hidden bg-[#F8FAF8]">
+    <section className="w-full overflow-hidden bg-background">
       <div className="mx-auto grid max-w-360 items-center gap-8 px-4 py-10 sm:px-6 md:grid-cols-2 md:gap-10 md:py-14 lg:px-12 lg:py-20">
         {/* Left Content */}
         <div className="space-y-5 sm:space-y-7">
-          <div className="inline-flex items-center gap-2 rounded-full bg-lime-100 px-3 py-1.5 text-xs font-bold tracking-wide text-green-800 sm:px-4 sm:py-2 sm:text-sm">
+          <div className="inline-flex items-center gap-2 rounded-full bg-lime-100 px-3 py-1.5 text-xs font-bold tracking-wide text-green-800 dark:bg-green-900/40 dark:text-lime-200 sm:px-4 sm:py-2 sm:text-sm">
             <Zap size={16} className="fill-green-700" />
             RENT WITH CONFIDENCE
           </div>
 
-          <h1 className="text-3xl font-extrabold leading-[1.15] tracking-tight text-[#17251C] sm:text-4xl md:text-5xl lg:text-6xl">
+          <h1 className="text-3xl font-extrabold leading-[1.15] tracking-tight text-foreground sm:text-4xl md:text-5xl lg:text-6xl">
             Rent the Right
             <br />
             Equipment,
-            <span className="text-green-700"> Anytime!</span>
+            <span className="text-green-700 dark:text-lime-400"> Anytime!</span>
           </h1>
 
-          <p className="max-w-lg text-sm leading-7 text-gray-600 sm:text-base lg:text-lg">
+          <p className="max-w-lg text-sm leading-7 text-muted-foreground sm:text-base lg:text-lg">
             Find and rent high-quality equipment for your projects, events, and
             more — quickly and easily.
           </p>

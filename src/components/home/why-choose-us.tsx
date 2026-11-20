@@ -36,20 +36,20 @@ const benefits = [
 
 const WhyChooseUs = () => {
   return (
-    <section className="bg-[#F8FAF8] px-6 py-20 lg:px-12 lg:py-24">
+    <section className="bg-background px-6 py-20 lg:px-12 lg:py-24">
       <div className="mx-auto max-w-7xl">
         <div className="grid gap-12 lg:grid-cols-[0.85fr_1.5fr] lg:items-center lg:gap-16">
           {/* Section introduction */}
           <div className="max-w-lg">
-            <span className="mb-4 inline-flex items-center rounded-full border border-green-200 bg-green-50 px-4 py-2 text-xs font-bold uppercase tracking-[0.15em] text-green-800">
+            <span className="mb-4 inline-flex items-center rounded-full border border-green-200 bg-green-50 px-4 py-2 text-xs font-bold uppercase tracking-[0.15em] text-green-800 dark:border-green-800 dark:bg-green-900/40 dark:text-lime-200">
               The GearNest Advantage
             </span>
 
-            <h2 className="text-3xl font-extrabold leading-tight tracking-tight text-[#17251C] sm:text-4xl lg:text-[42px]">
-              Why Choose <span className="text-green-700">GearNest?</span>
+            <h2 className="text-3xl font-extrabold leading-tight tracking-tight text-foreground sm:text-4xl lg:text-[42px]">
+              Why Choose <span className="text-green-700 dark:text-lime-400">GearNest?</span>
             </h2>
 
-            <p className="mt-5 text-base leading-8 text-[#647067]">
+            <p className="mt-5 text-base leading-8 text-muted-foreground">
               We make equipment rental simple, accessible, and reliable. Whether
               you are working on a project or planning an event, GearNest helps
               you get the right equipment without the hassle.
@@ -75,23 +75,23 @@ const WhyChooseUs = () => {
               return (
                 <div
                   key={benefit.title}
-                  className="group rounded-2xl border border-[#E2E9E2] bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-green-200 hover:shadow-lg hover:shadow-green-900/5 sm:p-7"
+                  className="group rounded-2xl border border-border bg-card p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-green-400 hover:shadow-lg hover:shadow-green-900/5 sm:p-7"
                 >
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#ECFCCB] text-[#166534] transition-colors duration-300 group-hover:bg-[#166534] group-hover:text-white">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#ECFCCB] text-[#166534] transition-colors duration-300 group-hover:bg-[#166534] group-hover:text-white dark:bg-green-900/40 dark:text-lime-300">
                     <Icon size={23} strokeWidth={1.8} />
                   </div>
 
                   <div className="mt-6 flex items-center justify-between">
-                    <h3 className="text-lg font-bold text-[#17251C]">
+                    <h3 className="text-lg font-bold text-foreground">
                       {benefit.title}
                     </h3>
 
-                    <span className="text-xs font-semibold text-[#A3B18A]">
+                    <span className="text-xs font-semibold text-muted-foreground">
                       0{index + 1}
                     </span>
                   </div>
 
-                  <p className="mt-3 text-sm leading-7 text-[#647067]">
+                  <p className="mt-3 text-sm leading-7 text-muted-foreground">
                     {benefit.description}
                   </p>
                 </div>

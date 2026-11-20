@@ -5,7 +5,7 @@ import WhyChooseUs from "@/components/home/why-choose-us";
 
 export default function Home() {
   return (
-    <div className="flex flex-1 flex-col bg-[#F8FAF8] font-sans">
+    <div className="flex flex-1 flex-col bg-background font-sans">
       <HomeBanner />
       <PopularCategories />
       <WhyChooseUs />
