@@ -1,4 +1,5 @@
 import { betterAuth } from "better-auth";
+import { createAuthMiddleware } from "better-auth/api";
 import { MongoClient } from "mongodb";
 import { mongodbAdapter } from "@better-auth/mongo-adapter";
 
@@ -22,8 +23,32 @@ export const auth = betterAuth({
     additionalFields: {
       role: {
         type: ["customer", "admin", "owner"],
-        input: false,
+        required: false,
+        defaultValue: "customer",
+        // The signup form can choose customer or owner. The before hook below
+        // prevents a client from assigning the admin role to itself.
+        input: true,
       },
     },
+  },
+  hooks: {
+    before: createAuthMiddleware(async (ctx) => {
+      if (ctx.path !== "/sign-up/email") {
+        return;
+      }
+
+      const body = ctx.body as { role?: unknown } | undefined;
+      const role = body?.role === "owner" ? "owner" : "customer";
+
+      return {
+        context: {
+          ...ctx,
+          body: {
+            ...body,
+            role,
+          },
+        },
+      };
+    }),
   },
 });

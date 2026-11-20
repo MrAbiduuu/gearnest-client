@@ -29,6 +29,7 @@ const inputClassName =
 const SignUpPage = () => {
   const router = useRouter();
   const [name, setName] = useState("");
+  const [role, setRole] = useState<"customer" | "owner">("customer");
   const [email, setEmail] = useState("");
   const [photoUrl, setPhotoUrl] = useState("");
   const [password, setPassword] = useState("");
@@ -99,6 +100,7 @@ const SignUpPage = () => {
         email: email.trim(),
         password,
         image: photoUrl.trim(),
+        role,
         callbackURL: "/",
       });
 
@@ -286,6 +288,58 @@ const SignUpPage = () => {
                   className={inputClassName}
                 />
               </div>
+
+              <fieldset>
+                <legend className="mb-2 block text-sm font-semibold text-foreground">
+                  Register as
+                </legend>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <label
+                    htmlFor="role-customer"
+                    className={`flex cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 text-sm font-medium transition ${
+                      role === "customer"
+                        ? "border-green-600 bg-green-50 text-green-800 ring-2 ring-green-600/10 dark:border-lime-500 dark:bg-green-900/30 dark:text-lime-200"
+                        : "border-border bg-card text-muted-foreground hover:border-green-400"
+                    }`}
+                  >
+                    <input
+                      id="role-customer"
+                      name="role"
+                      type="radio"
+                      value="customer"
+                      checked={role === "customer"}
+                      onChange={() => setRole("customer")}
+                      className="accent-green-700"
+                    />
+                    Customer
+                  </label>
+
+                  <label
+                    htmlFor="role-owner"
+                    className={`flex cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 text-sm font-medium transition ${
+                      role === "owner"
+                        ? "border-green-600 bg-green-50 text-green-800 ring-2 ring-green-600/10 dark:border-lime-500 dark:bg-green-900/30 dark:text-lime-200"
+                        : "border-border bg-card text-muted-foreground hover:border-green-400"
+                    }`}
+                  >
+                    <input
+                      id="role-owner"
+                      name="role"
+                      type="radio"
+                      value="owner"
+                      checked={role === "owner"}
+                      onChange={() => setRole("owner")}
+                      className="accent-green-700"
+                    />
+                    Owner
+                  </label>
+                </div>
+
+                <p className="mt-2 text-xs text-muted-foreground">
+                  Customers rent equipment. Owners list their equipment.
+                </p>
+              </fieldset>
 
               <div>
                 <label
