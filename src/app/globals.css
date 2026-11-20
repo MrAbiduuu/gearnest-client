@@ -152,6 +152,12 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
+/* Keep the dashboard sidebar solid in both themes. */
+
+[data-slot="sidebar-inner"] {
+  background-color: var(--sidebar);
+}
+
 /* Global Styles */
 
 @layer base {

@@ -23,11 +23,7 @@ import {
 import { toast } from "@/components/ui/toast";
 import ThemeToggle from "@/components/shared/themeToggle";
 import { signOut, useSession } from "@/lib/auth-client";
-import {
-  dashboardNavByRole,
-  roleLabels,
-  type UserRole,
-} from "./dashboard-nav";
+import { dashboardNavByRole, roleLabels, type UserRole } from "./dashboard-nav";
 
 const getInitials = (name?: string | null) => {
   const source = (name || "User").trim();
@@ -78,14 +74,18 @@ export function DashboardSidebar() {
       toast.add({
         type: "error",
         title: "Could not log out",
-        description: error instanceof Error ? error.message : "Please try again.",
+        description:
+          error instanceof Error ? error.message : "Please try again.",
         timeout: 5000,
       });
     }
   };
 
   return (
-    <Sidebar collapsible="icon">
+    <Sidebar
+      collapsible="icon"
+      className="top-16! h-[calc(100svh-4rem)]! border-r border-sidebar-border bg-white opacity-100! sm:top-20! sm:h-[calc(100svh-5rem)]! dark:bg-[#101d16]"
+    >
       <SidebarHeader className="gap-0 border-b border-sidebar-border p-3">
         <div className="flex items-center justify-between gap-2">
           <Link
@@ -95,7 +95,7 @@ export function DashboardSidebar() {
             aria-label="GearNest home"
           >
             <Image
-              src="/GearNestLogo.png"
+              src="/favicon.ico"
               alt="GearNest"
               width={155}
               height={50}
@@ -103,8 +103,6 @@ export function DashboardSidebar() {
               className="h-auto w-30 object-contain group-data-[collapsible=icon]:hidden"
             />
           </Link>
-
-          <ThemeToggle />
         </div>
 
         <div className="mt-3 flex items-center gap-3 rounded-xl bg-sidebar-accent/50 p-2 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:bg-transparent group-data-[collapsible=icon]:p-0">
