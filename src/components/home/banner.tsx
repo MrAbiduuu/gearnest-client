@@ -51,7 +51,7 @@ const HomeBanner = () => {
             width={900}
             height={500}
             priority
-            className="h-auto w-full max-w-[420px] object-contain sm:max-w-[550px] lg:max-w-[650px]"
+            className="h-auto w-full max-w-105 object-contain sm:max-w-137.5 lg:max-w-162.5"
           />
         </div>
       </div>
