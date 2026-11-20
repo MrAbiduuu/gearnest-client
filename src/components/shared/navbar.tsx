@@ -190,6 +190,25 @@ const Navbar = () => {
             />
           ) : user ? (
             <div className="hidden items-center gap-2 md:flex">
+              <div className="hidden items-center gap-2 xl:flex">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-xs text-muted-foreground"
+                >
+                  <MdAdminPanelSettings />
+                  Demo Admin
+                </Button>
+
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-xs text-muted-foreground"
+                >
+                  <FaSuitcase />
+                  Demo Owner
+                </Button>
+              </div>
               <Link
                 href="/dashboard"
                 title="Go to dashboard"

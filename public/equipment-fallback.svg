@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Equipment image placeholder">
+  <rect width="400" height="300" fill="#f1ece3"/>
+  <circle cx="200" cy="132" r="58" fill="#e2d7c5"/>
+  <path d="M168 132h64M200 100v64" stroke="#b9a98f" stroke-width="8" stroke-linecap="round"/>
+  <rect x="112" y="212" width="176" height="12" rx="6" fill="#d9cdb9"/>
+  <rect x="146" y="234" width="108" height="10" rx="5" fill="#e5dbc9"/>
+</svg>
