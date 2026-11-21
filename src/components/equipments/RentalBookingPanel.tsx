@@ -176,6 +176,7 @@ const RentalBookingPanel = ({
       startDate,
       endDate,
       quantity: String(quantity),
+      deliveryAddress: address.trim(),
     });
 
     toast.add({

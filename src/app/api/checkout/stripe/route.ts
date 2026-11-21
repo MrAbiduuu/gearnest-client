@@ -39,6 +39,10 @@ export async function POST(request: Request) {
   const quantity = Number(body.quantity);
   const email = typeof body.email === "string" ? body.email.trim() : "";
   const name = typeof body.name === "string" ? body.name.trim() : "";
+  const deliveryAddress =
+    typeof body.deliveryAddress === "string"
+      ? body.deliveryAddress.trim().slice(0, 300)
+      : "";
 
   if (
     !equipmentId ||
@@ -124,6 +128,7 @@ export async function POST(request: Request) {
       startDate,
       endDate,
       quantity: String(quantity),
+      deliveryAddress,
     });
 
     const form = new URLSearchParams({
@@ -147,6 +152,7 @@ export async function POST(request: Request) {
       "metadata[startDate]": startDate,
       "metadata[endDate]": endDate,
       "metadata[quantity]": String(quantity),
+      "metadata[deliveryAddress]": deliveryAddress,
     });
 
     if (name) form.set("metadata[name]", name);

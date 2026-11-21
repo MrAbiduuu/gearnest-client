@@ -24,6 +24,7 @@ type CheckoutPaymentProps = {
   equipment: Equipment;
   startDate: string;
   endDate: string;
+  deliveryAddress: string;
   quote: RentalQuote;
 };
 
@@ -59,6 +60,7 @@ const CheckoutPayment = ({
   equipment,
   startDate,
   endDate,
+  deliveryAddress,
   quote,
 }: CheckoutPaymentProps) => {
   const router = useRouter();
@@ -104,6 +106,7 @@ const CheckoutPayment = ({
           startDate,
           endDate,
           quantity: quote.quantity,
+          deliveryAddress,
           email: email.trim(),
           name: name.trim(),
         }),

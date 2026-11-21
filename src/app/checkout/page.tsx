@@ -28,18 +28,18 @@ const CheckoutProblem = ({
   title: string;
   description: string;
 }) => (
-  <main className="flex min-h-[70vh] items-center justify-center bg-[#f6f9fc] px-4 py-12">
-    <div className="w-full max-w-md rounded-2xl border border-[#e6e9ee] bg-white px-6 py-12 text-center shadow-sm">
+  <main className="flex min-h-[70vh] items-center justify-center bg-background px-4 py-12">
+    <div className="w-full max-w-md rounded-2xl border border-border bg-card px-6 py-12 text-center shadow-sm">
       <PackageSearch
-        className="mx-auto size-10 text-[#8792a2]"
+        className="mx-auto size-10 text-green-700 dark:text-lime-400"
         aria-hidden="true"
       />
-      <h1 className="mt-5 text-xl font-bold text-[#0a2540]">{title}</h1>
-      <p className="mt-2 text-sm leading-6 text-[#425466]">{description}</p>
+      <h1 className="mt-5 text-xl font-bold text-foreground">{title}</h1>
+      <p className="mt-2 text-sm leading-6 text-muted-foreground">{description}</p>
       <Button
         render={<Link href="/equipment" />}
         nativeButton={false}
-        className="mt-6 bg-[#635bff] text-white hover:bg-[#5148e8]"
+        className="mt-6 bg-[#166534] text-white hover:bg-[#14532D]"
       >
         <ArrowLeft aria-hidden="true" />
         Browse equipment
@@ -54,6 +54,7 @@ const CheckoutPage = async ({ searchParams }: CheckoutPageProps) => {
   const equipmentId = firstValue(query.equipmentId) ?? "";
   const startDate = firstValue(query.startDate) ?? "";
   const endDate = firstValue(query.endDate) ?? "";
+  const deliveryAddress = firstValue(query.deliveryAddress) ?? "";
 
   const rawQuantity = Number(firstValue(query.quantity) ?? 1);
   const quantity =
@@ -122,6 +123,7 @@ const CheckoutPage = async ({ searchParams }: CheckoutPageProps) => {
       equipment={equipment}
       startDate={startDate}
       endDate={endDate}
+      deliveryAddress={deliveryAddress}
       quote={quote}
     />
   );

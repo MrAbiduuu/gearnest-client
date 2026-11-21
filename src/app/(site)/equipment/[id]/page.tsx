@@ -6,10 +6,12 @@ import {
   MapPin,
   Package,
   ShieldCheck,
+  Star,
   Wrench,
 } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { connection } from "next/server";
 import FavoriteButton from "@/components/favorites/FavoriteButton";
 import EquipmentImage from "@/components/equipments/EquipmentImage";
 import RentalBookingPanel from "@/components/equipments/RentalBookingPanel";
@@ -49,6 +51,10 @@ const getInitials = (name: string) => {
 };
 
 const EquipmentDetailsPage = async ({ params }: EquipmentDetailsPageProps) => {
+  // Stock and the date input minimum must be computed per request, not during
+  // prerendering.
+  await connection();
+
   const { id } = await params;
   const equipment = await fetchEquipmentById(id);
 
@@ -247,6 +253,23 @@ const EquipmentDetailsPage = async ({ params }: EquipmentDetailsPageProps) => {
                   )}
                 </div>
               </div>
+            </section>
+
+            <section
+              id="reviews"
+              className="scroll-mt-24 border-t border-border pt-7"
+            >
+              <div className="flex items-center gap-2">
+                <span className="flex size-8 items-center justify-center rounded-lg bg-lime-100 text-green-700 dark:bg-green-900/40 dark:text-lime-300">
+                  <Star className="size-4" aria-hidden="true" />
+                </span>
+                <h2 className="text-lg font-bold text-foreground">Reviews</h2>
+              </div>
+
+              <p className="mt-4 rounded-xl border border-border bg-muted/40 p-4 text-sm leading-7 text-muted-foreground">
+                No reviews yet. After your rental, you can share feedback about
+                this equipment.
+              </p>
             </section>
 
             <section className="border-t border-border pt-7">
