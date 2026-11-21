@@ -19,6 +19,11 @@ import { toast } from "@/components/ui/toast";
 import { useSession } from "@/lib/auth-client";
 import type { Equipment } from "@/lib/equipment";
 import { formatRentalRate } from "@/lib/equipment-filters";
+import {
+  addDays,
+  getRentalQuote,
+  periodLabel,
+} from "@/lib/rental-pricing";
 
 type RentalBookingPanelProps = {
   equipment: Equipment;
@@ -30,65 +35,6 @@ type FieldErrors = {
   quantity?: string;
   phone?: string;
   address?: string;
-};
-
-const PERIOD_LABELS: Record<string, string> = {
-  daily: "Daily",
-  weekly: "Weekly",
-  monthly: "Monthly",
-};
-
-const periodLabel = (value: string) =>
-  PERIOD_LABELS[value.toLowerCase()] ?? value ?? "Daily";
-
-const periodInDays = (value: string) => {
-  switch (value.toLowerCase()) {
-    case "weekly":
-      return 7;
-    case "monthly":
-      return 30;
-    default:
-      return 1;
-  }
-};
-
-const toDateParts = (value: string) => {
-  const [year, month, day] = value.split("-").map(Number);
-  return { year, month, day };
-};
-
-const addDays = (value: string, days: number) => {
-  const { year, month, day } = toDateParts(value);
-  const date = new Date(year, month - 1, day);
-  date.setDate(date.getDate() + days);
-
-  const nextYear = date.getFullYear();
-  const nextMonth = String(date.getMonth() + 1).padStart(2, "0");
-  const nextDay = String(date.getDate()).padStart(2, "0");
-
-  return `${nextYear}-${nextMonth}-${nextDay}`;
-};
-
-const inclusiveDayCount = (start: string, end: string) => {
-  const from = toDateParts(start);
-  const to = toDateParts(end);
-
-  if (
-    !from.year ||
-    !from.month ||
-    !from.day ||
-    !to.year ||
-    !to.month ||
-    !to.day
-  ) {
-    return 0;
-  }
-
-  const difference =
-    Date.UTC(to.year, to.month - 1, to.day) -
-    Date.UTC(from.year, from.month - 1, from.day);
-
-  return Math.max(0, Math.floor(difference / 86_400_000) + 1);
 };
 
 const currency = (amount: number) => `৳${formatRentalRate(amount)}`;
@@ -125,9 +71,7 @@ const RentalBookingPanel = ({
   const stock = Math.max(0, Math.floor(equipment.availableStock ?? 0));
   const isAvailable = stock > 0;
   const maxQuantity = Math.max(1, stock);
-  const rate = Number.isFinite(equipment.rentalRate)
-    ? equipment.rentalRate
-    : 0;
+  const rate = Number.isFinite(equipment.rentalRate) ? equipment.rentalRate : 0;
   const period = periodLabel(equipment.rentalPeriod);
   const periodUnit = period.toLowerCase();
 
@@ -139,12 +83,16 @@ const RentalBookingPanel = ({
   const [instructions, setInstructions] = useState("");
   const [errors, setErrors] = useState<FieldErrors>({});
 
-  const hasValidDates =
-    Boolean(startDate && endDate) && endDate >= startDate && isAvailable;
-  const days = hasValidDates ? inclusiveDayCount(startDate, endDate) : 0;
-  const billingUnits =
-    days > 0 ? Math.ceil(days / periodInDays(equipment.rentalPeriod)) : 0;
-  const rentalCost = billingUnits * rate * quantity;
+  const quote = getRentalQuote({
+    rentalRate: rate,
+    rentalPeriod: equipment.rentalPeriod,
+    startDate,
+    endDate,
+    quantity,
+  });
+  const days = quote?.days ?? 0;
+  const billingUnits = quote?.billingUnits ?? 0;
+  const rentalCost = quote?.rentalCost ?? 0;
 
   const updateQuantity = (next: number) => {
     setQuantity(Math.min(maxQuantity, Math.max(1, next)));
@@ -183,18 +131,29 @@ const RentalBookingPanel = ({
     if (!validate()) return;
 
     if (!user) {
-      router.push("/signin");
+      router.push(
+        `/signin?callbackUrl=${encodeURIComponent(`/equipment/${equipment._id}`)}`,
+      );
       return;
     }
 
+    const params = new URLSearchParams({
+      equipmentId: equipment._id,
+      startDate,
+      endDate,
+      quantity: String(quantity),
+    });
+
     toast.add({
       type: "info",
-      title: "Booking details ready",
+      title: "Redirecting to secure checkout",
       description: `${currency(rentalCost)} for ${days} ${
         days === 1 ? "day" : "days"
-      } and ${quantity} ${quantity === 1 ? "unit" : "units"}. Demo checkout — no payment was taken.`,
-      timeout: 7000,
+      } and ${quantity} ${quantity === 1 ? "unit" : "units"}.`,
+      timeout: 4000,
     });
+
+    router.push(`/checkout?${params.toString()}`);
   };
 
   const fieldClass =
@@ -261,8 +220,8 @@ const RentalBookingPanel = ({
                 aria-hidden="true"
               />
               <p>
-                <span className="font-semibold">Demo checkout.</span> Booking as{" "}
-                {user.name || user.email}. No payment will be charged.
+                Booking as {user.name || user.email}. You&apos;ll complete
+                payment securely on Stripe.
               </p>
             </div>
           ) : (
@@ -297,7 +256,9 @@ const RentalBookingPanel = ({
                   min={defaultStartDate}
                   disabled={!isAvailable}
                   aria-invalid={Boolean(errors.dates)}
-                  aria-describedby={errors.dates ? "rental-date-error" : undefined}
+                  aria-describedby={
+                    errors.dates ? "rental-date-error" : undefined
+                  }
                   onChange={(event) => {
                     const value = event.target.value;
                     setStartDate(value);
@@ -326,7 +287,9 @@ const RentalBookingPanel = ({
                   min={startDate || defaultStartDate}
                   disabled={!isAvailable}
                   aria-invalid={Boolean(errors.dates)}
-                  aria-describedby={errors.dates ? "rental-date-error" : undefined}
+                  aria-describedby={
+                    errors.dates ? "rental-date-error" : undefined
+                  }
                   onChange={(event) => {
                     setEndDate(event.target.value);
                     setErrors((current) => ({
@@ -340,7 +303,10 @@ const RentalBookingPanel = ({
             </div>
 
             {errors.dates ? (
-              <p id="rental-date-error" className="mt-1.5 text-xs text-destructive">
+              <p
+                id="rental-date-error"
+                className="mt-1.5 text-xs text-destructive"
+              >
                 {errors.dates}
               </p>
             ) : null}
@@ -375,7 +341,9 @@ const RentalBookingPanel = ({
                 value={quantity}
                 disabled={!isAvailable}
                 aria-invalid={Boolean(errors.quantity)}
-                aria-describedby={errors.quantity ? "quantity-error" : undefined}
+                aria-describedby={
+                  errors.quantity ? "quantity-error" : undefined
+                }
                 onChange={(event) => {
                   const next = Number.parseInt(event.target.value, 10);
                   updateQuantity(Number.isNaN(next) ? 1 : next);
@@ -395,7 +363,10 @@ const RentalBookingPanel = ({
             </div>
 
             {errors.quantity ? (
-              <p id="quantity-error" className="mt-1.5 text-xs text-destructive">
+              <p
+                id="quantity-error"
+                className="mt-1.5 text-xs text-destructive"
+              >
                 {errors.quantity}
               </p>
             ) : null}
@@ -459,7 +430,10 @@ const RentalBookingPanel = ({
 
           <div>
             <Label htmlFor="special-instructions" className={labelClass}>
-              Special instructions <span className="font-normal text-muted-foreground">(optional)</span>
+              Special instructions{" "}
+              <span className="font-normal text-muted-foreground">
+                (optional)
+              </span>
             </Label>
             <Textarea
               id="special-instructions"
@@ -479,8 +453,14 @@ const RentalBookingPanel = ({
             label="Rental duration"
             value={days > 0 ? `${days} ${days === 1 ? "day" : "days"}` : "—"}
           />
-          <SummaryRow label="Rental rate" value={`${currency(rate)} / ${periodUnit}`} />
-          <SummaryRow label="Billing units" value={`${billingUnits} × ${period}`} />
+          <SummaryRow
+            label="Rental rate"
+            value={`${currency(rate)} / ${periodUnit}`}
+          />
+          <SummaryRow
+            label="Billing units"
+            value={`${billingUnits} × ${period}`}
+          />
           <SummaryRow label="Quantity" value={String(quantity)} />
           <SummaryRow label="Rental cost" value={currency(rentalCost)} />
           <SummaryRow label="Service fee" value={currency(0)} muted />
@@ -488,7 +468,9 @@ const RentalBookingPanel = ({
           <div className="flex items-center justify-between gap-4 border-t border-border pt-4">
             <div>
               <p className="text-sm font-bold text-foreground">Total payable</p>
-              <p className="text-[11px] text-muted-foreground">Due at checkout</p>
+              <p className="text-[11px] text-muted-foreground">
+                Due at checkout
+              </p>
             </div>
             <p className="text-2xl font-extrabold tracking-tight text-green-700 dark:text-lime-300">
               {currency(rentalCost)}
@@ -506,7 +488,7 @@ const RentalBookingPanel = ({
           </Button>
 
           <p className="pt-1 text-center text-[11px] leading-4 text-muted-foreground">
-            You won&apos;t be charged in this demo environment.
+            Payment is processed securely by Stripe.
           </p>
         </div>
       </form>
