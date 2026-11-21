@@ -25,6 +25,13 @@ type NavbarUser = {
   image?: string | null;
 };
 
+type DemoRole = "admin" | "owner";
+
+const demoAccounts = [
+  { role: "admin" as const, label: "Demo Admin", icon: MdAdminPanelSettings },
+  { role: "owner" as const, label: "Demo Owner", icon: FaSuitcase },
+];
+
 const getInitials = (user: NavbarUser) => {
   const source = (user.name || user.email || "U").trim();
   const parts = source.split(/\s+/).filter(Boolean);
@@ -73,11 +80,55 @@ const UserAvatar = ({
 
 const Navbar = () => {
   const router = useRouter();
-  const { data: session, isPending } = useSession();
+  const { data: session, isPending, refetch } = useSession();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [demoSignInRole, setDemoSignInRole] = useState<DemoRole | null>(null);
 
   const user = session?.user;
   const closeMenu = () => setIsMenuOpen(false);
+
+  const handleDemoSignIn = async (role: DemoRole) => {
+    closeMenu();
+    setDemoSignInRole(role);
+
+    try {
+      const response = await fetch("/api/demo/sign-in", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ role }),
+      });
+      const data = (await response.json()) as {
+        redirect?: string;
+        error?: string;
+      };
+
+      if (!response.ok || !data.redirect) {
+        throw new Error(data.error ?? "Could not sign in to the demo account.");
+      }
+
+      await refetch();
+
+      toast.add({
+        type: "success",
+        title: `Signed in as Demo ${role === "admin" ? "Admin" : "Owner"}`,
+        description: "Opening the demo dashboard…",
+        timeout: 4000,
+      });
+
+      router.push(data.redirect);
+      router.refresh();
+    } catch (error) {
+      toast.add({
+        type: "error",
+        title: "Demo sign-in failed",
+        description:
+          error instanceof Error ? error.message : "Please try again.",
+        timeout: 5000,
+      });
+    } finally {
+      setDemoSignInRole(null);
+    }
+  };
 
   const handleLogout = async () => {
     closeMenu();
@@ -150,27 +201,22 @@ const Navbar = () => {
         {/* Right Actions */}
         <div className="flex shrink-0 items-center gap-2 sm:gap-3">
           {/* Demo Accounts */}
-          {!user && (
-            <div className="hidden items-center gap-2 xl:flex">
+          <div className="hidden items-center gap-2 xl:flex">
+            {demoAccounts.map(({ role, label, icon: Icon }) => (
               <Button
+                key={role}
+                type="button"
                 variant="ghost"
                 size="sm"
+                disabled={demoSignInRole !== null}
+                onClick={() => handleDemoSignIn(role)}
                 className="text-xs text-muted-foreground"
               >
-                <MdAdminPanelSettings />
-                Demo Admin
+                <Icon />
+                {demoSignInRole === role ? "Signing in…" : label}
               </Button>
-
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-xs text-muted-foreground"
-              >
-                <FaSuitcase />
-                Demo Owner
-              </Button>
-            </div>
-          )}
+            ))}
+          </div>
 
           {/* Search */}
           <Link href="/equipment" aria-label="Search equipment">
@@ -190,25 +236,6 @@ const Navbar = () => {
             />
           ) : user ? (
             <div className="hidden items-center gap-2 md:flex">
-              <div className="hidden items-center gap-2 xl:flex">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-xs text-muted-foreground"
-                >
-                  <MdAdminPanelSettings />
-                  Demo Admin
-                </Button>
-
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-xs text-muted-foreground"
-                >
-                  <FaSuitcase />
-                  Demo Owner
-                </Button>
-              </div>
               <Link
                 href="/dashboard"
                 title="Go to dashboard"
@@ -359,29 +386,21 @@ const Navbar = () => {
             )}
 
             {/* Demo Accounts */}
-            {!user && (
-              <div className="mt-3 grid grid-cols-2 gap-2 border-t border-border pt-4 dark:border-green-900/60 xl:hidden">
-                <Link href="/" onClick={closeMenu}>
-                  <Button
-                    variant="ghost"
-                    className="w-full text-xs text-muted-foreground"
-                  >
-                    <MdAdminPanelSettings />
-                    Demo Admin
-                  </Button>
-                </Link>
-
-                <Link href="/" onClick={closeMenu}>
-                  <Button
-                    variant="ghost"
-                    className="w-full text-xs text-muted-foreground"
-                  >
-                    <FaSuitcase />
-                    Demo Owner
-                  </Button>
-                </Link>
-              </div>
-            )}
+            <div className="mt-3 grid grid-cols-2 gap-2 border-t border-border pt-4 dark:border-green-900/60 xl:hidden">
+              {demoAccounts.map(({ role, label, icon: Icon }) => (
+                <Button
+                  key={role}
+                  type="button"
+                  variant="ghost"
+                  disabled={demoSignInRole !== null}
+                  onClick={() => handleDemoSignIn(role)}
+                  className="w-full text-xs text-muted-foreground"
+                >
+                  <Icon />
+                  {demoSignInRole === role ? "Signing in…" : label}
+                </Button>
+              ))}
+            </div>
           </div>
         </nav>
       )}
