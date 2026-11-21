@@ -20,6 +20,17 @@ import Image from "next/image";
 const inputClassName =
   "h-12 w-full rounded-xl border border-border bg-card px-4 text-sm text-foreground outline-none transition placeholder:text-muted-foreground focus:border-green-600 focus:ring-4 focus:ring-green-600/10";
 
+/** Only allow local relative paths so the callback cannot be an open redirect. */
+const getCallbackUrl = () => {
+  const requested = new URLSearchParams(window.location.search).get(
+    "callbackUrl",
+  );
+
+  return requested && requested.startsWith("/") && !requested.startsWith("//")
+    ? requested
+    : "/";
+};
+
 const SignInPage = () => {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -49,11 +60,12 @@ const SignInPage = () => {
     setIsSubmitting(true);
 
     try {
+      const callbackUrl = getCallbackUrl();
       const result = await authClient.signIn.email({
         email: email.trim(),
         password,
         rememberMe,
-        callbackURL: "/",
+        callbackURL: callbackUrl,
       });
 
       if (result.error) {
@@ -68,7 +80,7 @@ const SignInPage = () => {
         timeout: 5000,
       });
 
-      router.push("/");
+      router.push(callbackUrl);
       router.refresh();
     } catch (error) {
       showError(
@@ -86,7 +98,7 @@ const SignInPage = () => {
     try {
       const result = await authClient.signIn.social({
         provider: "google",
-        callbackURL: "/",
+        callbackURL: getCallbackUrl(),
       });
 
       if (result.error) {

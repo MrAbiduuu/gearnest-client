@@ -2,17 +2,7 @@ import { getFavoriteEquipments, getSessionUserId } from "@/lib/favorites";
 
 /** GET /api/favorites - populated favorites of the signed-in customer only. */
 export async function GET(request: Request) {
-  let userId: string | null;
-
-  try {
-    userId = await getSessionUserId(request);
-  } catch (error) {
-    console.error("Could not verify session for favorites", error);
-    return Response.json(
-      { success: false, message: "Could not verify your session." },
-      { status: 401 },
-    );
-  }
+  const userId = await getSessionUserId(request);
 
   if (!userId) {
     return Response.json(

@@ -1,5 +1,6 @@
 "use client";
 
+import FavoriteButton from "@/components/favorites/FavoriteButton";
 import { Equipment, fetchEquipments } from "@/lib/equipment";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
@@ -165,6 +166,11 @@ const FeaturedEquipments = () => {
                   <span className="absolute left-3 top-3 rounded-full border border-white/30 bg-background/90 px-3 py-1.5 text-xs font-semibold text-foreground backdrop-blur-md">
                     {equipment.category}
                   </span>
+
+                  <FavoriteButton
+                    equipment={equipment}
+                    className="top-auto bottom-3"
+                  />
 
                   <span
                     className={`absolute right-3 top-3 rounded-full px-3 py-1.5 text-xs font-semibold backdrop-blur-md ${

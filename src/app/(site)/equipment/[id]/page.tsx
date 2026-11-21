@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import FavoriteButton from "@/components/favorites/FavoriteButton";
 import EquipmentImage from "@/components/equipments/EquipmentImage";
 import RentalBookingPanel from "@/components/equipments/RentalBookingPanel";
 import {
@@ -147,9 +148,13 @@ const EquipmentDetailsPage = async ({ params }: EquipmentDetailsPageProps) => {
                 </span>
               </div>
 
-              <h1 className="mt-4 text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
-                {equipment.name}
-              </h1>
+              <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+                <h1 className="text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
+                  {equipment.name}
+                </h1>
+
+                <FavoriteButton equipment={equipment} variant="inline" />
+              </div>
 
               <p className="mt-3 inline-flex items-center gap-1.5 text-sm text-muted-foreground">
                 <MapPin className="size-4 shrink-0" aria-hidden="true" />

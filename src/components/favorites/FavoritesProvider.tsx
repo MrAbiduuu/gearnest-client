@@ -90,7 +90,9 @@ export const FavoritesProvider = ({ children }: { children: ReactNode }) => {
     if (isSessionPending) return;
 
     const controller = new AbortController();
-    void load(controller.signal);
+    // Defer the fetch so initial state updates don't run synchronously in the
+    // effect body (React's cascading-render rule).
+    queueMicrotask(() => void load(controller.signal));
 
     return () => controller.abort();
   }, [isSessionPending, load]);

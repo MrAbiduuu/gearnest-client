@@ -36,18 +36,7 @@ const EquipmentCard = ({ item }: { item: Equipment }) => {
           className="size-full object-cover transition duration-500 group-hover:scale-105"
         />
 
-        <button
-          type="button"
-          onClick={() => setIsFavorite((current) => !current)}
-          aria-label={isFavorite ? "Remove from wishlist" : "Add to wishlist"}
-          aria-pressed={isFavorite}
-          className="absolute top-3 left-3 flex size-8 items-center justify-center rounded-full bg-white/95 text-[#7a5a3c] shadow-sm transition hover:scale-110 hover:text-red-600 dark:bg-zinc-900/90 dark:text-lime-200"
-        >
-          <Heart
-            className={`size-4 ${isFavorite ? "fill-red-500 text-red-500" : ""}`}
-            aria-hidden="true"
-          />
-        </button>
+        <FavoriteButton equipment={item} />
 
         <span
           className={`absolute top-3 right-3 rounded-full px-2.5 py-1 text-[11px] font-bold tracking-wide shadow-sm ${
@@ -90,7 +79,9 @@ const EquipmentCard = ({ item }: { item: Equipment }) => {
                 </span>
               ) : null}
             </span>
-          ) : item.condition ? (
+          ) : null}
+
+          {item.condition ? (
             <span className="inline-flex items-center gap-1">
               <Wrench className="size-3.5" aria-hidden="true" />
               {item.condition} condition

@@ -9,15 +9,6 @@ import {
 
 type RouteContext = { params: Promise<{ equipmentId: string }> };
 
-const requireUser = async (request: Request) => {
-  try {
-    return await getSessionUserId(request);
-  } catch (error) {
-    console.error("Could not verify session for favorites", error);
-    return null;
-  }
-};
-
 const validateId = (rawId: string) => {
   const equipmentId = toEquipmentObjectId(rawId);
   if (!equipmentId || !isValidEquipmentId(rawId)) return null;
@@ -26,7 +17,7 @@ const validateId = (rawId: string) => {
 
 /** POST /api/favorites/:equipmentId */
 export async function POST(request: Request, { params }: RouteContext) {
-  const userId = await requireUser(request);
+  const userId = await getSessionUserId(request);
   if (!userId) {
     return Response.json(
       { success: false, message: "You must be signed in." },
@@ -70,7 +61,7 @@ export async function POST(request: Request, { params }: RouteContext) {
 
 /** DELETE /api/favorites/:equipmentId - only for the signed-in user. */
 export async function DELETE(request: Request, { params }: RouteContext) {
-  const userId = await requireUser(request);
+  const userId = await getSessionUserId(request);
   if (!userId) {
     return Response.json(
       { success: false, message: "You must be signed in." },
