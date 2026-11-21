@@ -1,13 +1,378 @@
-import DashboardPagePlaceholder from "../../../component/DashboardPagePlaceholder";
+"use client";
+
+import React, { useEffect, useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import {
+  UserRound,
+  Mail,
+  Phone,
+  MapPin,
+  ShieldCheck,
+  Save,
+  ArrowLeft,
+} from "lucide-react";
+
+import { authClient, useSession } from "@/lib/auth-client";
+import { toast } from "@/components/ui/toast";
+
+type ProfileForm = {
+  name: string;
+  phone: string;
+  address: string;
+  avatar: string;
+};
+
+const fallbackAvatar =
+  "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400&auto=format&fit=crop&q=80";
 
 const CustomerProfilePage = () => {
+  const { data: session, isPending, refetch } = useSession();
+  const user = session?.user;
+
+  const [form, setForm] = useState<ProfileForm>({
+    name: "",
+    phone: "",
+    address: "",
+    avatar: "",
+  });
+
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (!user) return;
+
+    const values = {
+      name: user.name ?? "",
+      phone: user.phone ?? "",
+      address: user.address ?? "",
+      avatar: user.image ?? "",
+    };
+
+    queueMicrotask(() => setForm(values));
+  }, [user]);
+
+  const setField =
+    (field: keyof ProfileForm) =>
+    (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      setForm((previous) => ({
+        ...previous,
+        [field]: event.target.value,
+      }));
+    };
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (!user) return;
+
+    setSaving(true);
+    setError("");
+
+    try {
+      const result = await authClient.updateUser({
+        name: form.name.trim(),
+        image: form.avatar.trim() || null,
+        phone: form.phone.trim(),
+        address: form.address.trim(),
+      });
+
+      if (result.error) {
+        throw new Error(result.error.message || "Could not save your profile.");
+      }
+
+      await refetch();
+
+      toast.add({
+        type: "success",
+        title: "Profile updated successfully",
+        description: "Your profile changes have been saved.",
+        timeout: 5000,
+      });
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Could not save your profile.";
+
+      setError(message);
+
+      toast.add({
+        type: "error",
+        title: "Profile update failed",
+        description: message,
+        timeout: 6000,
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const inputClass =
+    "w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground outline-none transition placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/10 disabled:cursor-not-allowed disabled:opacity-60";
+
+  const labelClass = "mb-2 block text-sm font-semibold text-foreground";
+
+  const roleLabel =
+    user?.role === "owner"
+      ? "Owner Account"
+      : user?.role === "admin"
+        ? "Admin Account"
+        : "Customer Account";
+
+  const isDisabled = isPending || saving || !user;
+  const avatarSrc = form.avatar.trim() || fallbackAvatar;
+
   return (
-    <DashboardPagePlaceholder
-      title="Profile Settings"
-      description="Manage your personal information and account preferences."
-    >
-      Your profile settings form will go here.
-    </DashboardPagePlaceholder>
+    <div className="min-h-screen bg-background pb-12">
+      <div className="mx-auto max-w-5xl">
+        {/* Back Navigation */}
+        <Link
+          href="/dashboard/user"
+          className="mb-7 inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition hover:text-primary"
+        >
+          <ArrowLeft size={16} />
+          Back to Dashboard
+        </Link>
+
+        {/* Page Heading */}
+        <div className="mb-8">
+          <div className="mb-3 flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-primary">
+            <UserRound size={17} />
+            Customer Account
+          </div>
+
+          <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+            My Profile
+          </h1>
+
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">
+            Manage your personal information, contact details, delivery address,
+            and profile picture.
+          </p>
+        </div>
+
+        <div className="space-y-6">
+          {/* Profile Overview */}
+          <section className="overflow-hidden rounded-2xl border border-border bg-card">
+            <div className="h-28 bg-linear-to-r from-primary/20 via-primary/10 to-transparent" />
+
+            <div className="px-5 pb-6 sm:px-8">
+              <div className="-mt-12 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
+                  <Image
+                    src={avatarSrc}
+                    alt={form.name || "Customer avatar"}
+                    width={96}
+                    height={96}
+                    unoptimized
+                    className="h-24 w-24 rounded-2xl border-4 border-card object-cover shadow-lg"
+                  />
+
+                  <div className="pb-1">
+                    <h2 className="text-xl font-bold text-foreground">
+                      {form.name || "GearNest Customer"}
+                    </h2>
+
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      {user?.email || "Loading account..."}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex w-fit items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-4 py-2 text-xs font-bold text-primary">
+                  <ShieldCheck size={15} />
+                  {roleLabel}
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Profile Form */}
+          <form onSubmit={handleSubmit}>
+            <section className="rounded-2xl border border-border bg-card p-5 sm:p-8">
+              <div className="mb-7">
+                <h2 className="text-lg font-bold text-foreground">
+                  Personal Information
+                </h2>
+
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Update your registered account and contact information.
+                </p>
+              </div>
+
+              <fieldset disabled={isDisabled} className="space-y-6">
+                {/* Name and Email */}
+                <div className="grid gap-6 sm:grid-cols-2">
+                  <div>
+                    <label className={labelClass} htmlFor="customer-name">
+                      Full Name
+                    </label>
+
+                    <div className="relative">
+                      <UserRound
+                        size={17}
+                        className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground"
+                      />
+
+                      <input
+                        id="customer-name"
+                        value={form.name}
+                        onChange={setField("name")}
+                        required
+                        placeholder="Your full name"
+                        className={`${inputClass} pl-11`}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className={labelClass} htmlFor="customer-email">
+                      Email Address
+                    </label>
+
+                    <div className="relative">
+                      <Mail
+                        size={17}
+                        className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground"
+                      />
+
+                      <input
+                        id="customer-email"
+                        type="email"
+                        value={user?.email ?? ""}
+                        readOnly
+                        className={`${inputClass} cursor-not-allowed bg-muted/40 pl-11 text-muted-foreground`}
+                      />
+                    </div>
+
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      Email changes require a separate verification flow.
+                    </p>
+                  </div>
+
+                  {/* Phone */}
+                  <div className="sm:col-span-2">
+                    <label className={labelClass} htmlFor="customer-phone">
+                      Phone Number
+                    </label>
+
+                    <div className="relative">
+                      <Phone
+                        size={17}
+                        className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground"
+                      />
+
+                      <input
+                        id="customer-phone"
+                        type="tel"
+                        value={form.phone}
+                        onChange={setField("phone")}
+                        placeholder="e.g. +880 1700-000000"
+                        className={`${inputClass} pl-11`}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Avatar */}
+                  <div className="sm:col-span-2">
+                    <label className={labelClass} htmlFor="customer-avatar">
+                      Profile Image URL
+                    </label>
+
+                    <input
+                      id="customer-avatar"
+                      type="url"
+                      value={form.avatar}
+                      onChange={setField("avatar")}
+                      placeholder="https://example.com/avatar.jpg"
+                      className={inputClass}
+                    />
+
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      Paste a direct image URL. Your profile preview updates
+                      automatically.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Address */}
+                <div>
+                  <label className={labelClass} htmlFor="customer-address">
+                    Delivery Address
+                  </label>
+
+                  <div className="relative">
+                    <MapPin
+                      size={17}
+                      className="absolute left-4 top-4 text-muted-foreground"
+                    />
+
+                    <textarea
+                      id="customer-address"
+                      value={form.address}
+                      onChange={setField("address")}
+                      rows={3}
+                      placeholder="Enter your delivery address"
+                      className={`${inputClass} resize-none pl-11`}
+                    />
+                  </div>
+
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    This address can be used when arranging equipment
+                    deliveries.
+                  </p>
+                </div>
+              </fieldset>
+
+              {error && (
+                <p className="mt-5 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-600">
+                  {error}
+                </p>
+              )}
+
+              {/* Save Button */}
+              <div className="mt-8 flex flex-col-reverse justify-between gap-4 border-t border-border pt-6 sm:flex-row sm:items-center">
+                <p className="text-xs text-muted-foreground">
+                  <ShieldCheck size={13} className="mr-1 inline" />
+                  Your profile information is securely associated with your
+                  GearNest account.
+                </p>
+
+                <button
+                  type="submit"
+                  disabled={isDisabled}
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-7 py-3 text-sm font-bold text-primary-foreground transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <Save size={17} />
+                  {saving ? "Saving..." : "Save Profile Changes"}
+                </button>
+              </div>
+            </section>
+          </form>
+
+          {/* Account Security */}
+          <section className="rounded-2xl border border-border bg-card p-5 sm:p-6">
+            <div className="flex items-start gap-3">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <ShieldCheck size={21} />
+              </div>
+
+              <div>
+                <h3 className="font-bold text-foreground">
+                  Your Account is Protected
+                </h3>
+
+                <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                  Your saved profile details are attached to your signed-in
+                  GearNest account and can be used across your customer
+                  dashboard and rental bookings.
+                </p>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
   );
 };
 

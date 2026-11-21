@@ -149,7 +149,7 @@ const ProfilePage = () => {
         <div className="space-y-6">
           {/* Profile Overview */}
           <section className="overflow-hidden rounded-2xl border border-border bg-card">
-            <div className="h-28 bg-gradient-to-r from-primary/20 via-primary/10 to-transparent" />
+            <div className="h-28 bg-linear-to-r from-primary/20 via-primary/10 to-transparent" />
 
             <div className="px-5 pb-6 sm:px-8">
               <div className="-mt-12 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">

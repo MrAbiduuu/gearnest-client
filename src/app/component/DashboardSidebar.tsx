@@ -87,11 +87,11 @@ export function DashboardSidebar() {
       className="top-16! h-[calc(100svh-4rem)]! border-r border-sidebar-border bg-white opacity-100! sm:top-20! sm:h-[calc(100svh-5rem)]! dark:bg-[#101d16]"
     >
       <SidebarHeader className="gap-0 border-b border-sidebar-border p-3">
-        <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center justify-center gap-2">
           <Link
             href="/"
             onClick={closeMobileMenu}
-            className="flex min-w-0 items-center"
+            className="flex items-center"
             aria-label="GearNest home"
           >
             <Image
@@ -100,7 +100,7 @@ export function DashboardSidebar() {
               width={155}
               height={50}
               priority
-              className="h-auto w-30 object-contain group-data-[collapsible=icon]:hidden"
+              className="h-auto w-15 object-contain group-data-[collapsible=icon]:hidden"
             />
           </Link>
         </div>

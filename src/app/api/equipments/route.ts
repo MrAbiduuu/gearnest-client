@@ -1,4 +1,9 @@
 import { auth } from "@/lib/auth";
+import {
+  getEquipmentApiBaseUrl,
+  unwrapApiData,
+  type Equipment,
+} from "@/lib/equipment";
 
 const equipmentFields = [
   "name",
@@ -15,11 +20,57 @@ const equipmentFields = [
   "imageUrls",
 ] as const;
 
-const getApiBaseUrl = () =>
-  (process.env.NEXT_PUBLIC_EQUIPMENT_API_URL ?? "http://localhost:5000").replace(
-    /\/+$/,
-    "",
-  );
+export async function GET(request: Request) {
+  const session = await auth.api.getSession({ headers: request.headers });
+
+  if (!session) {
+    return Response.json(
+      { success: false, message: "You must be signed in." },
+      { status: 401 },
+    );
+  }
+
+  if (session.user.role !== "owner") {
+    return Response.json(
+      { success: false, message: "Only owners can manage equipment." },
+      { status: 403 },
+    );
+  }
+
+  try {
+    const backendResponse = await fetch(`${getEquipmentApiBaseUrl()}/equipments`, {
+      cache: "no-store",
+    });
+
+    if (!backendResponse.ok) {
+      return Response.json(
+        { success: false, message: "Could not load your equipment." },
+        { status: 502 },
+      );
+    }
+
+    const equipments = unwrapApiData(await backendResponse.json());
+    if (!Array.isArray(equipments)) {
+      return Response.json(
+        { success: false, message: "Unexpected equipment API response." },
+        { status: 502 },
+      );
+    }
+
+    const ownerEmail = session.user.email.toLowerCase();
+    const owned = (equipments as Equipment[]).filter(
+      (item) => item.owner?.email?.toLowerCase() === ownerEmail,
+    );
+
+    return Response.json({ success: true, data: owned });
+  } catch (error) {
+    console.error("Could not load owner equipment", error);
+    return Response.json(
+      { success: false, message: "The equipment service is unavailable." },
+      { status: 502 },
+    );
+  }
+}
 
 export async function POST(request: Request) {
   const session = await auth.api.getSession({ headers: request.headers });
@@ -67,7 +118,7 @@ export async function POST(request: Request) {
   };
 
   try {
-    const backendResponse = await fetch(`${getApiBaseUrl()}/equipments`, {
+    const backendResponse = await fetch(`${getEquipmentApiBaseUrl()}/equipments`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),

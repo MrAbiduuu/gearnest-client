@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Suspense } from "react";
 import {
   SidebarInset,
   SidebarProvider,
@@ -9,7 +9,16 @@ import { DashboardSidebar } from "../component/DashboardSidebar";
 const DashBoardLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <SidebarProvider className="min-h-0! h-[calc(100svh-4rem)] overflow-hidden sm:h-[calc(100svh-5rem)]">
-      <DashboardSidebar />
+      <Suspense
+        fallback={
+          <div
+            aria-hidden="true"
+            className="hidden w-64 shrink-0 border-r border-sidebar-border bg-white sm:block dark:bg-[#101d16]"
+          />
+        }
+      >
+        <DashboardSidebar />
+      </Suspense>
 
       <SidebarInset className="h-full overflow-hidden">
         <header className="flex h-16 shrink-0 items-center gap-3 border-b border-border bg-background px-4 sm:px-6">

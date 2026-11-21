@@ -5,20 +5,19 @@ import Link from "next/link";
 import {
   ArrowRight,
   Folder,
-  Heart,
   MapPin,
   ShieldCheck,
   Star,
   User,
   Wrench,
 } from "lucide-react";
+import FavoriteButton from "@/components/favorites/FavoriteButton";
 import { formatRentalRate } from "@/lib/equipment-filters";
 import type { Equipment } from "@/lib/equipment";
 
 const FALLBACK_IMAGE = "/equipment-fallback.svg";
 
 const EquipmentCard = ({ item }: { item: Equipment }) => {
-  const [isFavorite, setIsFavorite] = useState(false);
   const [imageSrc, setImageSrc] = useState(item.image || FALLBACK_IMAGE);
 
   const isAvailable = item.availableStock > 0;
