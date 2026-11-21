@@ -46,7 +46,10 @@ const WhyChooseUs = () => {
             </span>
 
             <h2 className="text-3xl font-extrabold leading-tight tracking-tight text-foreground sm:text-4xl lg:text-[42px]">
-              Why Choose <span className="text-green-700 dark:text-lime-400">GearNest?</span>
+              Why Choose{" "}
+              <span className="text-green-700 dark:text-lime-400">
+                GearNest?
+              </span>
             </h2>
 
             <p className="mt-5 text-base leading-8 text-muted-foreground">
