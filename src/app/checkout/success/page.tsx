@@ -53,6 +53,7 @@ const OutcomeCard = ({
 
       <Button
         render={<Link href="/equipment" />}
+        nativeButton={false}
         className="mt-6 bg-[#635bff] text-white hover:bg-[#5148e8]"
       >
         Browse more equipment

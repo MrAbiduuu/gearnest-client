@@ -32,6 +32,7 @@ const CheckoutProblem = ({
       <p className="mt-2 text-sm leading-6 text-[#425466]">{description}</p>
       <Button
         render={<Link href="/equipment" />}
+        nativeButton={false}
         className="mt-6 bg-[#635bff] text-white hover:bg-[#5148e8]"
       >
         <ArrowLeft aria-hidden="true" />

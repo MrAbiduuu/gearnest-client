@@ -55,6 +55,7 @@ const MyFavoritesPage = () => {
             render={
               <Link href="/signin?callbackUrl=/dashboard/customer/favorites" />
             }
+            nativeButton={false}
             className="mt-5 rounded-md"
           >
             Sign in
@@ -75,6 +76,7 @@ const MyFavoritesPage = () => {
           </p>
           <Button
             render={<Link href="/equipment" />}
+            nativeButton={false}
             size="lg"
             className="mt-6 rounded-md"
           >
