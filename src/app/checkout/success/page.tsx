@@ -1,6 +1,12 @@
 import Link from "next/link";
+import { headers } from "next/headers";
 import { CheckCircle2, Package, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  getSessionUserIdFromHeaders,
+  isValidEquipmentId,
+  recordCompletedPurchase,
+} from "@/lib/purchases";
 
 // This page reads a Stripe session ID from the request and verifies it live.
 export const instant = false;
@@ -10,14 +16,24 @@ type CheckoutSuccessPageProps = {
 };
 
 type StripeCheckoutSession = {
+  id?: string;
   payment_status?: string;
   customer_email?: string | null;
+  amount_total?: number | null;
+  currency?: string | null;
+  metadata?: Record<string, string>;
 };
 
 type Outcome = {
   success: boolean;
   title: string;
   description: string;
+};
+
+const parseOptionalNumber = (value: string | undefined) => {
+  if (!value) return undefined;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : undefined;
 };
 
 const OutcomeCard = ({
@@ -65,6 +81,7 @@ const OutcomeCard = ({
 const verifyCheckoutSession = async (
   sessionId: string,
   secretKey: string,
+  currentUserId: string | null,
 ): Promise<Outcome> => {
   try {
     const response = await fetch(
@@ -95,6 +112,36 @@ const verifyCheckoutSession = async (
         description:
           "Stripe has not marked this payment as paid yet. You can return to the catalog and start another checkout.",
       };
+    }
+
+    const metadata = session.metadata ?? {};
+    const purchasedUserId = metadata.userId;
+    const equipmentId = metadata.equipmentId;
+
+    if (
+      currentUserId &&
+      purchasedUserId === currentUserId &&
+      equipmentId &&
+      isValidEquipmentId(equipmentId)
+    ) {
+      try {
+        await recordCompletedPurchase({
+          userId: currentUserId,
+          equipmentId,
+          stripeSessionId: session.id || sessionId,
+          amountTotal:
+            typeof session.amount_total === "number"
+              ? session.amount_total
+              : undefined,
+          currency: session.currency ?? undefined,
+          startDate: metadata.startDate || undefined,
+          endDate: metadata.endDate || undefined,
+          quantity: parseOptionalNumber(metadata.quantity),
+        });
+      } catch (error) {
+        // Payment succeeded; a failed bookkeeping write must not hide that.
+        console.error("Could not record completed purchase", error);
+      }
     }
 
     return {
@@ -143,7 +190,9 @@ const CheckoutSuccessPage = async ({
       description: "Add STRIPE_SECRET_KEY to enable and verify payments.",
     };
   } else {
-    outcome = await verifyCheckoutSession(sessionId, secretKey);
+    const requestHeaders = await headers();
+    const currentUserId = await getSessionUserIdFromHeaders(requestHeaders);
+    outcome = await verifyCheckoutSession(sessionId, secretKey, currentUserId);
   }
 
   return <OutcomeCard {...outcome} />;

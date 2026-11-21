@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -8,6 +8,7 @@ import {
   CalendarDays,
   CheckCircle2,
   Info,
+  Loader2,
   Minus,
   Plus,
 } from "lucide-react";
@@ -19,6 +20,7 @@ import { toast } from "@/components/ui/toast";
 import { useSession } from "@/lib/auth-client";
 import type { Equipment } from "@/lib/equipment";
 import { formatRentalRate } from "@/lib/equipment-filters";
+import { checkPurchaseStatus } from "@/lib/purchases-api";
 import {
   addDays,
   getRentalQuote,
@@ -82,6 +84,38 @@ const RentalBookingPanel = ({
   const [address, setAddress] = useState("");
   const [instructions, setInstructions] = useState("");
   const [errors, setErrors] = useState<FieldErrors>({});
+  const [isCheckingPurchase, setIsCheckingPurchase] = useState(false);
+  const [isPurchased, setIsPurchased] = useState(false);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    // Defer state updates out of the effect body (React cascading-render rule).
+    queueMicrotask(() => {
+      if (controller.signal.aborted) return;
+
+      if (!user?.id) {
+        setIsCheckingPurchase(false);
+        setIsPurchased(false);
+        return;
+      }
+
+      setIsCheckingPurchase(true);
+
+      void checkPurchaseStatus(equipment._id, controller.signal)
+        .then((purchased) => {
+          if (!controller.signal.aborted) setIsPurchased(purchased);
+        })
+        .catch(() => {
+          if (!controller.signal.aborted) setIsPurchased(false);
+        })
+        .finally(() => {
+          if (!controller.signal.aborted) setIsCheckingPurchase(false);
+        });
+    });
+
+    return () => controller.abort();
+  }, [equipment._id, user?.id]);
 
   const quote = getRentalQuote({
     rentalRate: rate,
@@ -127,7 +161,7 @@ const RentalBookingPanel = ({
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (!isAvailable || isPending) return;
+    if (!isAvailable || isPending || isPurchased) return;
     if (!validate()) return;
 
     if (!user) {
@@ -241,6 +275,19 @@ const RentalBookingPanel = ({
               </p>
             </div>
           )}
+
+          {isPurchased ? (
+            <div className="flex items-start gap-2.5 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2.5 text-xs leading-5 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-200">
+              <CheckCircle2
+                className="mt-0.5 size-4 shrink-0"
+                aria-hidden="true"
+              />
+              <p>
+                You&apos;ve already completed checkout for this equipment, so
+                checkout is disabled.
+              </p>
+            </div>
+          ) : null}
 
           <div>
             <div className="grid grid-cols-2 gap-3">
@@ -480,11 +527,27 @@ const RentalBookingPanel = ({
           <Button
             type="submit"
             size="lg"
-            disabled={!isAvailable || isPending}
-            className="mt-4 h-12 w-full bg-green-700 font-semibold text-white shadow-md shadow-green-900/15 transition hover:bg-green-800 dark:bg-lime-500 dark:text-[#052e16] dark:hover:bg-lime-400"
+            disabled={
+              !isAvailable || isPending || isCheckingPurchase || isPurchased
+            }
+            className="mt-4 h-12 w-full bg-green-700 font-semibold text-white shadow-md shadow-green-900/15 transition hover:bg-green-800 disabled:cursor-not-allowed dark:bg-lime-500 dark:text-[#052e16] dark:hover:bg-lime-400"
           >
-            Continue to checkout
-            <ArrowRight className="size-4" aria-hidden="true" />
+            {isPurchased ? (
+              <>
+                <CheckCircle2 className="size-4" aria-hidden="true" />
+                Checkout completed
+              </>
+            ) : isCheckingPurchase ? (
+              <>
+                <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+                Checking purchase…
+              </>
+            ) : (
+              <>
+                Continue to checkout
+                <ArrowRight className="size-4" aria-hidden="true" />
+              </>
+            )}
           </Button>
 
           <p className="pt-1 text-center text-[11px] leading-4 text-muted-foreground">

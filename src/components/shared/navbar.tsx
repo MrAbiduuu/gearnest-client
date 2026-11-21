@@ -14,8 +14,8 @@ import { FaSuitcase } from "react-icons/fa";
 const navLinks = [
   { href: "/", label: "Home" },
   { href: "/equipment", label: "All Equipment" },
-  { href: "/#about", label: "About Us" },
-  { href: "/#contact", label: "Contact Us" },
+  { href: "/about", label: "About Us" },
+  { href: "/contact", label: "Contact Us" },
   { href: "/#how-it-works", label: "How It Works" },
 ];
 
