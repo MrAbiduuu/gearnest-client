@@ -1,8 +1,9 @@
 /**
  * Equipment API types and fetch helper.
  *
- * The backend is a small Express service. It exposes a single endpoint:
- *   GET /equipments -> raw JSON array of MongoDB documents
+ * The backend is a small Express service. It exposes:
+ *   GET /equipments     -> { success, message, data: MongoDB documents[] }
+ *   GET /equipments/:id -> { success, message, data: MongoDB document }
  *
  * Only the fields that actually exist in that response are declared as
  * required. A few optional fields are included so the UI can take advantage
@@ -46,6 +47,12 @@ const getApiBaseUrl = () =>
     "",
   );
 
+/** Unwrap the Express API's { success, message, data } response envelope. */
+const unwrapApiData = (payload: unknown): unknown =>
+  payload && typeof payload === "object" && "data" in payload
+    ? (payload as { data: unknown }).data
+    : payload;
+
 export async function fetchEquipments(
   signal?: AbortSignal,
 ): Promise<Equipment[]> {
@@ -58,11 +65,45 @@ export async function fetchEquipments(
     throw new Error(`Could not load equipment (status ${response.status}).`);
   }
 
-  const data: unknown = await response.json();
+  // A bare array is accepted as well, so this keeps working if the API's
+  // { success, message, data } wrapper is removed later.
+  const equipments = unwrapApiData(await response.json());
 
-  if (!Array.isArray(data)) {
+  if (!Array.isArray(equipments)) {
     throw new Error("The equipment API returned an unexpected response.");
   }
 
-  return data as Equipment[];
+  return equipments as Equipment[];
+}
+
+/** Fetch one equipment document. Returns null when the API responds with 404. */
+export async function fetchEquipmentById(
+  id: string,
+): Promise<Equipment | null> {
+  const response = await fetch(
+    `${getApiBaseUrl()}/equipments/${encodeURIComponent(id)}`,
+    { cache: "no-store" },
+  );
+
+  if (response.status === 404) return null;
+
+  if (!response.ok) {
+    throw new Error(
+      `Could not load this equipment (status ${response.status}).`,
+    );
+  }
+
+  const equipment = unwrapApiData(await response.json());
+
+  if (
+    !equipment ||
+    typeof equipment !== "object" ||
+    Array.isArray(equipment) ||
+    typeof (equipment as Partial<Equipment>)._id !== "string" ||
+    typeof (equipment as Partial<Equipment>).name !== "string"
+  ) {
+    throw new Error("The equipment API returned an unexpected response.");
+  }
+
+  return equipment as Equipment;
 }
