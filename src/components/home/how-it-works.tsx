@@ -1,3 +1,6 @@
+
+"use client";
+
 import Link from "next/link";
 import {
   Search,
@@ -6,6 +9,7 @@ import {
   PackageCheck,
   ArrowRight,
 } from "lucide-react";
+import { motion, useReducedMotion } from "motion/react";
 
 const steps = [
   {
@@ -38,53 +42,150 @@ const steps = [
 ];
 
 const HowItWorks = () => {
+  const shouldReduceMotion = useReducedMotion();
+
   return (
     <section
       id="how-it-works"
-      className="border-t border-border bg-card px-6 py-20 lg:px-12 lg:py-24"
+      className="overflow-hidden border-t border-border bg-card px-6 py-20 lg:px-12 lg:py-24"
     >
       <div className="mx-auto max-w-7xl">
-        {/* Section heading */}
-        <div className="mx-auto mb-16 max-w-2xl text-center">
+        {/* Section Heading */}
+        <motion.div
+          initial={
+            shouldReduceMotion
+              ? false
+              : { opacity: 0, y: 30 }
+          }
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.5 }}
+          transition={{
+            duration: shouldReduceMotion ? 0 : 0.7,
+            ease: "easeOut",
+          }}
+          className="mx-auto mb-16 max-w-2xl text-center"
+        >
           <span className="inline-flex items-center rounded-full border border-green-200 bg-green-50 px-4 py-2 text-xs font-bold uppercase tracking-[0.15em] text-green-800 dark:border-green-800 dark:bg-green-900/40 dark:text-lime-200">
             Simple & Convenient
           </span>
 
           <h2 className="mt-5 text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl lg:text-[42px]">
-            How It <span className="text-green-700 dark:text-lime-400">Works</span>
+            How It{" "}
+            <span className="text-green-700 dark:text-lime-400">
+              Works
+            </span>
           </h2>
 
           <p className="mt-4 text-base leading-8 text-muted-foreground">
             Getting the equipment you need has never been easier. Follow these
             four simple steps and get started with GearNest.
           </p>
-        </div>
+        </motion.div>
 
         {/* Steps */}
         <div className="relative grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {/* Connecting line on desktop */}
-          <div className="absolute left-[12%] right-[12%] top-10 hidden border-t-2 border-dashed border-border lg:block" />
+          {/* Desktop Connecting Line */}
+          <div className="absolute left-[12%] right-[12%] top-10 hidden h-[2px] overflow-hidden bg-border lg:block">
+            <motion.div
+              initial={{ scaleX: 0 }}
+              whileInView={{ scaleX: 1 }}
+              viewport={{ once: true, amount: 0.8 }}
+              transition={{
+                duration: shouldReduceMotion ? 0 : 1.6,
+                ease: [0.22, 1, 0.36, 1],
+                delay: shouldReduceMotion ? 0 : 0.3,
+              }}
+              style={{
+                originX: 0,
+              }}
+              className="h-full w-full bg-gradient-to-r from-green-700 via-lime-500 to-green-700 dark:from-lime-500 dark:via-green-400 dark:to-lime-500"
+            />
+          </div>
 
-          {steps.map((step) => {
+          {steps.map((step, index) => {
             const Icon = step.icon;
 
             return (
-              <div
+              <motion.div
                 key={step.number}
-                className="group relative rounded-2xl border border-border bg-background p-7 transition-all duration-300 hover:-translate-y-2 hover:border-green-400 hover:bg-card hover:shadow-xl hover:shadow-green-900/5 dark:hover:bg-green-950/30"
+                initial={
+                  shouldReduceMotion
+                    ? false
+                    : {
+                        opacity: 0,
+                        y: 45,
+                      }
+                }
+                whileInView={{
+                  opacity: 1,
+                  y: 0,
+                }}
+                viewport={{
+                  once: true,
+                  amount: 0.25,
+                }}
+                transition={{
+                  duration: shouldReduceMotion ? 0 : 0.65,
+                  delay: shouldReduceMotion ? 0 : 0.2 + index * 0.18,
+                  ease: [0.22, 1, 0.36, 1],
+                }}
+                whileHover={
+                  shouldReduceMotion
+                    ? undefined
+                    : {
+                        y: -8,
+                        transition: {
+                          duration: 0.25,
+                        },
+                      }
+                }
+                className="group relative rounded-2xl border border-border bg-background p-7 transition-colors duration-300 hover:border-green-400 hover:bg-card hover:shadow-xl hover:shadow-green-900/5 dark:hover:bg-green-950/30"
               >
                 {/* Icon */}
-                <div className="relative z-10 flex h-20 w-20 items-center justify-center rounded-2xl border border-border bg-card text-[#166534] shadow-sm transition-all duration-300 group-hover:border-[#166534] group-hover:bg-[#166534] group-hover:text-white dark:text-lime-300">
+                <motion.div
+                  initial={
+                    shouldReduceMotion
+                      ? false
+                      : {
+                          scale: 0.7,
+                          rotate: -20,
+                        }
+                  }
+                  whileInView={{
+                    scale: 1,
+                    rotate: 0,
+                  }}
+                  viewport={{
+                    once: true,
+                    amount: 0.4,
+                  }}
+                  transition={{
+                    duration: shouldReduceMotion ? 0 : 0.6,
+                    delay: shouldReduceMotion ? 0 : 0.35 + index * 0.18,
+                    type: "spring",
+                    stiffness: 180,
+                    damping: 14,
+                  }}
+                  whileHover={
+                    shouldReduceMotion
+                      ? undefined
+                      : {
+                          rotate: 8,
+                          scale: 1.08,
+                        }
+                  }
+                  className="relative z-10 flex h-20 w-20 items-center justify-center rounded-2xl border border-border bg-card text-[#166534] shadow-sm transition-colors duration-300 group-hover:border-[#166534] group-hover:bg-[#166534] group-hover:text-white dark:text-lime-300"
+                >
                   <Icon size={30} strokeWidth={1.7} />
-                </div>
+                </motion.div>
 
-                {/* Step number */}
+                {/* Step Number */}
                 <div className="mt-7 flex items-center justify-between">
                   <span className="text-xs font-bold uppercase tracking-[0.16em] text-green-700 dark:text-lime-400">
                     Step {step.number}
                   </span>
 
-                  <span className="h-px flex-1 bg-border ml-4" />
+                  <span className="ml-4 h-px flex-1 bg-border transition-colors duration-300 group-hover:bg-green-500/50" />
                 </div>
 
                 <h3 className="mt-4 text-xl font-bold text-foreground">
@@ -94,13 +195,38 @@ const HowItWorks = () => {
                 <p className="mt-3 text-sm leading-7 text-muted-foreground">
                   {step.description}
                 </p>
-              </div>
+              </motion.div>
             );
           })}
         </div>
 
         {/* Bottom CTA */}
-        <div className="mt-14 flex flex-col items-center justify-between gap-5 rounded-2xl bg-[#166534] px-7 py-8 sm:flex-row sm:px-10">
+        <motion.div
+          initial={
+            shouldReduceMotion
+              ? false
+              : {
+                  opacity: 0,
+                  y: 35,
+                  scale: 0.98,
+                }
+          }
+          whileInView={{
+            opacity: 1,
+            y: 0,
+            scale: 1,
+          }}
+          viewport={{
+            once: true,
+            amount: 0.3,
+          }}
+          transition={{
+            duration: shouldReduceMotion ? 0 : 0.75,
+            delay: shouldReduceMotion ? 0 : 0.2,
+            ease: "easeOut",
+          }}
+          className="mt-14 flex flex-col items-center justify-between gap-5 rounded-2xl bg-[#166534] px-7 py-8 sm:flex-row sm:px-10"
+        >
           <div>
             <h3 className="text-xl font-bold text-white sm:text-2xl">
               Ready to find your equipment?
@@ -121,7 +247,7 @@ const HowItWorks = () => {
               className="transition-transform duration-300 group-hover:translate-x-1"
             />
           </Link>
-        </div>
+        </motion.div>
       </div>
     </section>
   );
