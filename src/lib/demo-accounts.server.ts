@@ -71,7 +71,6 @@ export const ensureDemoAccount = async (role: DemoRole): Promise<void> => {
     { _id: user._id },
     {
       $set: {
-        name: account.name,
         role: account.role,
         updatedAt: new Date(),
       },

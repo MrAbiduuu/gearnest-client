@@ -29,6 +29,18 @@ export const auth = betterAuth({
         // prevents a client from assigning the admin role to itself.
         input: true,
       },
+      phone: {
+        type: "string",
+        required: false,
+        defaultValue: "",
+        input: true,
+      },
+      address: {
+        type: "string",
+        required: false,
+        defaultValue: "",
+        input: true,
+      },
     },
   },
   hooks: {
