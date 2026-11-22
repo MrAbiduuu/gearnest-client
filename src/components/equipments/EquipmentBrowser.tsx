@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { SlidersHorizontal } from "lucide-react";
+import { ChevronLeft, ChevronRight, SlidersHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -27,6 +27,16 @@ import EquipmentGrid from "./EquipmentGrid";
 import EquipmentSearch from "./EquipmentSearch";
 import EquipmentSort from "./EquipmentSort";
 
+const PAGE_SIZE = 9;
+
+type PageState = {
+  items: Equipment[];
+  filters: FilterState;
+  searchTerm: string;
+  sort: SortOption;
+  page: number;
+};
+
 const EquipmentBrowser = () => {
   const searchParams = useSearchParams();
   const categoryFromUrl = searchParams.get("category") ?? "";
@@ -44,6 +54,7 @@ const EquipmentBrowser = () => {
     categories: categoryFromUrl ? [categoryFromUrl] : [],
   }));
   const [sort, setSort] = useState<SortOption>("recent");
+  const [pageState, setPageState] = useState<PageState | null>(null);
 
   // Fetch once on mount, and again whenever the retry button is pressed.
   useEffect(() => {
@@ -76,6 +87,27 @@ const EquipmentBrowser = () => {
     () => sortEquipments(filterEquipments(items, filters, searchTerm), sort),
     [items, filters, searchTerm, sort],
   );
+
+  // The stored page only applies to the exact result set that produced it.
+  // Any filter, search, sort or data change falls back to page 1.
+  const isCurrentResult =
+    pageState?.items === items &&
+    pageState.filters === filters &&
+    pageState.searchTerm === searchTerm &&
+    pageState.sort === sort;
+  const page = isCurrentResult && pageState ? pageState.page : 1;
+
+  const totalPages = Math.max(1, Math.ceil(visibleItems.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const startIndex = (currentPage - 1) * PAGE_SIZE;
+  const paginatedItems = useMemo(
+    () => visibleItems.slice(startIndex, startIndex + PAGE_SIZE),
+    [visibleItems, startIndex],
+  );
+
+  const goToPage = (nextPage: number) => {
+    setPageState({ items, filters, searchTerm, sort, page: nextPage });
+  };
 
   const hasLocationData = useMemo(
     () => items.some((item) => Boolean(item.location)),
@@ -180,11 +212,21 @@ const EquipmentBrowser = () => {
 
         <div className="mt-5 mb-4 flex flex-wrap items-center justify-between gap-2">
           <p className="text-sm text-muted-foreground">
-            Showing{" "}
-            <span className="font-bold text-foreground">
-              {visibleItems.length}
-            </span>{" "}
-            of {items.length} equipment
+            {visibleItems.length === 0 ? (
+              <>Showing 0 equipment</>
+            ) : (
+              <>
+                Showing{" "}
+                <span className="font-bold text-foreground">
+                  {startIndex + 1}–{startIndex + paginatedItems.length}
+                </span>{" "}
+                of{" "}
+                <span className="font-bold text-foreground">
+                  {visibleItems.length}
+                </span>{" "}
+                equipment
+              </>
+            )}
           </p>
 
           {hasActiveFilters(filters, searchTerm) ? (
@@ -199,11 +241,48 @@ const EquipmentBrowser = () => {
         </div>
 
         <EquipmentGrid
-          items={visibleItems}
+          items={paginatedItems}
           loading={loading}
           error={error}
           onRetry={retry}
         />
+
+        {!loading && !error && totalPages > 1 ? (
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-sm text-muted-foreground">
+              Page{" "}
+              <span className="font-semibold text-foreground">
+                {currentPage}
+              </span>{" "}
+              of {totalPages}
+            </p>
+
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={currentPage <= 1}
+                onClick={() => goToPage(currentPage - 1)}
+                className="rounded-lg"
+              >
+                <ChevronLeft aria-hidden="true" />
+                Previous
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={currentPage >= totalPages}
+                onClick={() => goToPage(currentPage + 1)}
+                className="rounded-lg"
+              >
+                Next
+                <ChevronRight aria-hidden="true" />
+              </Button>
+            </div>
+          </div>
+        ) : null}
       </section>
     </div>
   );

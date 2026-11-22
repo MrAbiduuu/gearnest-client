@@ -13,6 +13,8 @@ import {
   ArrowRight,
   ArrowUpRight,
   CalendarDays,
+  ChevronLeft,
+  ChevronRight,
   Clock3,
   MapPin,
   Package,
@@ -39,6 +41,14 @@ const filters: { key: FilterKey; label: string }[] = [
   { key: "confirmed", label: "Confirmed" },
   { key: "cancelled", label: "Cancelled" },
 ];
+
+const PAGE_SIZE = 5;
+
+type BookingPageState = {
+  bookings: CustomerBooking[];
+  activeFilter: FilterKey;
+  page: number;
+};
 
 const statusStyles: Record<BookingStatus, string> = {
   confirmed:
@@ -265,6 +275,7 @@ const MyBookingsPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeFilter, setActiveFilter] = useState<FilterKey>("all");
+  const [pageState, setPageState] = useState<BookingPageState | null>(null);
 
   // Status summary cards link here with ?status=pending|confirmed|cancelled.
   useEffect(() => {
@@ -341,6 +352,31 @@ const MyBookingsPage = () => {
     [activeFilter, bookings],
   );
 
+  // A stored page is only valid for the filter and data set that created it.
+  const isCurrentResult =
+    pageState?.bookings === bookings &&
+    pageState.activeFilter === activeFilter;
+  const page = isCurrentResult && pageState ? pageState.page : 1;
+
+  const totalPages = Math.max(
+    1,
+    Math.ceil(visibleBookings.length / PAGE_SIZE),
+  );
+  const currentPage = Math.min(page, totalPages);
+  const startIndex = (currentPage - 1) * PAGE_SIZE;
+  const paginatedBookings = useMemo(
+    () => visibleBookings.slice(startIndex, startIndex + PAGE_SIZE),
+    [visibleBookings, startIndex],
+  );
+
+  const goToPage = (nextPage: number) => {
+    setPageState({ bookings, activeFilter, page: nextPage });
+  };
+
+  const changeFilter = (filter: FilterKey) => {
+    setActiveFilter(filter);
+  };
+
   const isInitializing = isSessionPending || (Boolean(userId) && isLoading);
 
   return (
@@ -410,7 +446,7 @@ const MyBookingsPage = () => {
                   type="button"
                   role="tab"
                   aria-selected={isActive}
-                  onClick={() => setActiveFilter(filter.key)}
+                  onClick={() => changeFilter(filter.key)}
                   className={`inline-flex shrink-0 items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition duration-200 ${
                     isActive
                       ? "border-[#166534] bg-[#166534] text-white shadow-md shadow-green-900/15 dark:border-lime-400 dark:bg-lime-400 dark:text-[#17251C]"
@@ -462,7 +498,7 @@ const MyBookingsPage = () => {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => setActiveFilter("all")}
+                  onClick={() => changeFilter("all")}
                   className="mt-6 rounded-lg"
                 >
                   Show all bookings
@@ -472,13 +508,63 @@ const MyBookingsPage = () => {
           ) : (
             <div className="space-y-5">
               <p className="text-sm text-muted-foreground">
-                Showing {visibleBookings.length} of {bookings.length}{" "}
-                {bookings.length === 1 ? "booking" : "bookings"}
+                {visibleBookings.length === 0 ? (
+                  <>Showing 0 bookings</>
+                ) : (
+                  <>
+                    Showing{" "}
+                    <span className="font-semibold text-foreground">
+                      {startIndex + 1}–{startIndex + paginatedBookings.length}
+                    </span>{" "}
+                    of{" "}
+                    <span className="font-semibold text-foreground">
+                      {visibleBookings.length}
+                    </span>{" "}
+                    {visibleBookings.length === 1 ? "booking" : "bookings"}
+                  </>
+                )}
               </p>
 
-              {visibleBookings.map((booking) => (
+              {paginatedBookings.map((booking) => (
                 <BookingCard key={booking.id} booking={booking} />
               ))}
+
+              {totalPages > 1 ? (
+                <div className="flex flex-col gap-3 border-t border-border pt-4 sm:flex-row sm:items-center sm:justify-between">
+                  <p className="text-sm text-muted-foreground">
+                    Page{" "}
+                    <span className="font-semibold text-foreground">
+                      {currentPage}
+                    </span>{" "}
+                    of {totalPages}
+                  </p>
+
+                  <div className="flex items-center gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      disabled={currentPage <= 1}
+                      onClick={() => goToPage(currentPage - 1)}
+                      className="rounded-lg"
+                    >
+                      <ChevronLeft aria-hidden="true" />
+                      Previous
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      disabled={currentPage >= totalPages}
+                      onClick={() => goToPage(currentPage + 1)}
+                      className="rounded-lg"
+                    >
+                      Next
+                      <ChevronRight aria-hidden="true" />
+                    </Button>
+                  </div>
+                </div>
+              ) : null}
             </div>
           )}
         </>
