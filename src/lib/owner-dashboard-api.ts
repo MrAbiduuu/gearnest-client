@@ -63,6 +63,23 @@ export type OwnerDashboardOverview = {
   };
 };
 
+export type OwnerMonthlyBookingPoint = {
+  month: string;
+  monthNumber: number;
+  totalBookings: number;
+  pendingBookings: number;
+  confirmedBookings: number;
+  cancelledBookings: number;
+};
+
+export type OwnerMonthlyBookingsData = {
+  year: number;
+  availableYears: number[];
+  monthlyBookings: OwnerMonthlyBookingPoint[];
+  bookingStatusesIncluded: OwnerBookingStatus[];
+  timezone: string;
+};
+
 export type OwnerMonthlyRevenuePoint = {
   month: string;
   monthNumber: number;
@@ -140,6 +157,30 @@ export async function fetchOwnerDashboardOverview(
   }
 
   return ((await response.json()) as Envelope<OwnerDashboardOverview>).data;
+}
+
+export async function fetchOwnerDashboardMonthlyBookings(
+  year: number,
+  signal?: AbortSignal,
+): Promise<OwnerMonthlyBookingsData> {
+  const query = new URLSearchParams({ year: String(year) });
+  const response = await fetch(
+    `${OWNER_DASHBOARD_BASE_URL}/monthly-bookings?${query}`,
+    {
+      signal,
+      credentials: "include",
+      cache: "no-store",
+    },
+  );
+
+  if (!response.ok) {
+    throw new OwnerDashboardRequestError(
+      await getErrorMessage(response, "Could not load your monthly bookings."),
+      response.status,
+    );
+  }
+
+  return ((await response.json()) as Envelope<OwnerMonthlyBookingsData>).data;
 }
 
 export async function fetchOwnerDashboardRevenue(

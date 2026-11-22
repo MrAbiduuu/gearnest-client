@@ -53,6 +53,27 @@ export type RentalBooking = {
   createdAt?: string;
 };
 
+export type OwnerRentalEquipmentStatus = "approved" | "pending" | "rejected";
+
+/** A listing owned by the signed-in owner, with its booking totals. */
+export type OwnerRentalEquipment = {
+  id: string;
+  name: string;
+  category?: string;
+  image?: string;
+  rentalRate: number;
+  rentalPeriod?: string;
+  availableStock: number;
+  status: OwnerRentalEquipmentStatus;
+  requestCount: number;
+  pendingRequests: number;
+  confirmedRequests: number;
+  cancelledRequests: number;
+  /** At least one confirmed request exists for this listing. */
+  isOnRent: boolean;
+  createdAt?: string;
+};
+
 export type RentalStatistics = {
   totalBookings: number;
   statusCounts: Record<OwnerRentalStatusFilter, number>;
@@ -60,6 +81,8 @@ export type RentalStatistics = {
 
 export type OwnerRentalsData = {
   bookings: RentalBooking[];
+  /** All owner listings matching the search, including those with no bookings. */
+  equipment: OwnerRentalEquipment[];
   stats: RentalStatistics;
   /** Bookings matching the active status and search filters. */
   total: number;

@@ -22,7 +22,12 @@ import {
   formatCount,
   getChartScale,
 } from "@/components/admin/analytics-utils";
-import type { AdminMonthlyBookingsData } from "@/lib/admin-analytics-api";
+/** Structural subset shared by the admin and owner booking API responses. */
+type MonthlyBookingsChartData = {
+  year: number;
+  monthlyBookings: Array<{ month: string; totalBookings: number }>;
+  bookingStatusesIncluded: string[];
+};
 
 const chartConfig = {
   totalBookings: {
@@ -37,7 +42,7 @@ const SKELETON_MONTHS = [
 ];
 
 type MonthlyBookingVolumeChartProps = {
-  data: AdminMonthlyBookingsData | null;
+  data: MonthlyBookingsChartData | null;
   isLoading: boolean;
   error: string | null;
   onRetry: () => void;

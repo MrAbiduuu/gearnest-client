@@ -15,11 +15,13 @@ import {
   Boxes,
   CalendarDays,
   CheckCircle2,
+  CircleDollarSign,
   Clock3,
   CreditCard,
   Loader2,
   MapPin,
   Package,
+  Pencil,
   Phone,
   RefreshCw,
   Search,
@@ -30,7 +32,7 @@ import {
 } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
 
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -48,6 +50,8 @@ import {
   updateOwnerRentalStatus,
   type OwnerRentalStatus,
   type OwnerRentalStatusFilter,
+  type OwnerRentalEquipment,
+  type OwnerRentalEquipmentStatus,
   type OwnerRentalsData,
   type RentalBooking,
   type RentalStatistics,
@@ -85,6 +89,21 @@ const actionStatusStyles: Record<OwnerRentalStatus, string> = {
   pending: "text-orange-700 dark:text-orange-300",
   confirmed: "text-blue-700 dark:text-blue-300",
   cancelled: "text-red-700 dark:text-red-300",
+};
+
+const equipmentStatusStyles: Record<OwnerRentalEquipmentStatus, string> = {
+  approved:
+    "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/60 dark:bg-emerald-950/30 dark:text-emerald-300",
+  pending:
+    "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-300",
+  rejected:
+    "border-red-200 bg-red-50 text-red-700 dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-300",
+};
+
+const equipmentStatusLabel: Record<OwnerRentalEquipmentStatus, string> = {
+  approved: "Published",
+  pending: "In review",
+  rejected: "Needs attention",
 };
 
 const emptyCounts: RentalStatistics["statusCounts"] = {
@@ -175,6 +194,130 @@ const Detail = ({ icon, label, value }: DetailProps) => (
         {value || "—"}
       </p>
     </div>
+  </div>
+);
+
+type EquipmentCardProps = {
+  equipment: OwnerRentalEquipment;
+  index: number;
+  reducedMotion: boolean;
+};
+
+const EquipmentCard = ({
+  equipment,
+  index,
+  reducedMotion,
+}: EquipmentCardProps) => (
+  <motion.article
+    initial={reducedMotion ? false : { opacity: 0, y: 10 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true, amount: 0.1 }}
+    transition={{
+      duration: reducedMotion ? 0 : 0.35,
+      delay: reducedMotion ? 0 : Math.min(index, 5) * 0.04,
+      ease: [0.22, 1, 0.36, 1],
+    }}
+    className="flex min-w-0 flex-col rounded-2xl border border-[#EDE1D6] bg-white p-4 shadow-sm dark:border-stone-800 dark:bg-[#111310]"
+  >
+    <div className="flex min-w-0 gap-3">
+      <motion.div
+        whileHover={reducedMotion ? undefined : { scale: 1.05 }}
+        transition={{ type: "spring", stiffness: 260, damping: 20 }}
+        className="relative size-16 shrink-0 overflow-hidden rounded-xl border border-[#EDE1D6] bg-[#F3E9DE] dark:border-stone-800 dark:bg-stone-800"
+      >
+        <Image
+          src={equipment.image || FALLBACK_IMAGE}
+          alt={equipment.name}
+          fill
+          unoptimized
+          sizes="64px"
+          className="object-cover"
+          onError={(event) => {
+            if (!event.currentTarget.src.endsWith(FALLBACK_IMAGE)) {
+              event.currentTarget.src = FALLBACK_IMAGE;
+            }
+          }}
+        />
+      </motion.div>
+
+      <div className="min-w-0 flex-1">
+        <div className="flex flex-wrap items-center gap-1.5">
+          <motion.span
+            initial={reducedMotion ? false : { opacity: 0, scale: 0.92 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: reducedMotion ? 0 : 0.3 }}
+            className={`inline-flex rounded-full border px-2 py-0.5 text-[10px] font-bold ${equipmentStatusStyles[equipment.status]}`}
+          >
+            {equipmentStatusLabel[equipment.status]}
+          </motion.span>
+          {equipment.isOnRent ? (
+            <motion.span
+              initial={reducedMotion ? false : { opacity: 0, scale: 0.92 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: reducedMotion ? 0 : 0.3, delay: reducedMotion ? 0 : 0.05 }}
+              className="inline-flex rounded-full border border-orange-200 bg-orange-50 px-2 py-0.5 text-[10px] font-bold text-orange-700 dark:border-orange-900/60 dark:bg-orange-950/30 dark:text-orange-300"
+            >
+              On rent
+            </motion.span>
+          ) : null}
+        </div>
+
+        <h3
+          className="mt-1.5 text-sm font-bold break-words text-[#2E2119] dark:text-stone-100"
+          title={equipment.name}
+        >
+          {equipment.name}
+        </h3>
+        <p className="mt-0.5 truncate text-[11px] text-[#8B7B6B] dark:text-stone-400">
+          {equipment.category || "Equipment"} · {equipment.availableStock}{" "}
+          {equipment.availableStock === 1 ? "unit" : "units"} available
+        </p>
+      </div>
+    </div>
+
+    <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-[#F1E9E0] pt-3 text-[11px] font-semibold text-[#6F5D4D] dark:border-stone-800 dark:text-stone-300">
+      <span className="inline-flex items-center gap-1.5">
+        <CircleDollarSign aria-hidden="true" className="size-3.5 text-[#C2561B] dark:text-orange-400" />
+        {formatCurrency(equipment.rentalRate)}
+        {equipment.rentalPeriod ? ` / ${capitalize(equipment.rentalPeriod)}` : ""}
+      </span>
+      <span className="inline-flex items-center gap-1.5">
+        <Boxes aria-hidden="true" className="size-3.5 text-[#C2561B] dark:text-orange-400" />
+        {formatCount(equipment.requestCount)}{" "}
+        {equipment.requestCount === 1 ? "request" : "requests"}
+      </span>
+    </div>
+
+    <p className="mt-2 text-[11px] text-[#9A8A79] dark:text-stone-500">
+      {equipment.requestCount === 0
+        ? "No rental requests yet"
+        : `${formatCount(equipment.pendingRequests)} pending · ${formatCount(equipment.confirmedRequests)} confirmed · ${formatCount(equipment.cancelledRequests)} cancelled`}
+    </p>
+
+    <Link
+      href={`/dashboard/owner/equipment/edit/${equipment.id}`}
+      className="mt-3 inline-flex items-center gap-1.5 self-start text-[11px] font-bold text-[#C2561B] transition hover:text-[#9A3412] dark:text-orange-400 dark:hover:text-orange-300"
+    >
+      <Pencil aria-hidden="true" className="size-3" />
+      Manage listing
+    </Link>
+  </motion.article>
+);
+
+const EquipmentCardSkeleton = () => (
+  <div className="rounded-2xl border border-[#EDE1D6] bg-white p-4 dark:border-stone-800 dark:bg-[#111310]">
+    <div className="flex gap-3">
+      <Skeleton className="size-16 shrink-0 rounded-xl bg-[#F3E9DE] dark:bg-stone-800" />
+      <div className="min-w-0 flex-1 space-y-2">
+        <Skeleton className="h-4 w-24 bg-[#F3E9DE] dark:bg-stone-800" />
+        <Skeleton className="h-4 w-3/4 bg-[#F3E9DE] dark:bg-stone-800" />
+        <Skeleton className="h-3 w-1/2 bg-[#F3E9DE] dark:bg-stone-800" />
+      </div>
+    </div>
+    <Skeleton className="mt-4 h-3 w-2/3 bg-[#F3E9DE] dark:bg-stone-800" />
+    <Skeleton className="mt-3 h-3 w-24 bg-[#F3E9DE] dark:bg-stone-800" />
   </div>
 );
 
@@ -637,6 +780,7 @@ const MyRentalsPage = () => {
   }, [dialog, performDecision]);
 
   const counts = stats?.statusCounts ?? data?.stats.statusCounts ?? emptyCounts;
+  const ownerEquipment = data?.equipment ?? [];
   const totalCount = stats?.totalBookings ?? data?.stats.totalBookings ?? 0;
   const matchedCount = data?.total ?? 0;
   const hasActiveFilters = status !== "all" || debouncedQuery.trim() !== "";
@@ -772,6 +916,60 @@ const MyRentalsPage = () => {
               ) : null}
             </div>
           </div>
+
+          <motion.section
+            initial={reducedMotion ? false : { opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: reducedMotion ? 0 : 0.4 }}
+            className="space-y-4"
+            aria-label="Your equipment"
+          >
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <h2 className="text-base font-extrabold text-[#2E2119] dark:text-stone-100">
+                  Your equipment ({isInitialLoading ? "…" : formatCount(ownerEquipment.length)})
+                </h2>
+                <p className="mt-1 text-xs text-[#8B7B6B] dark:text-stone-400">
+                  Published listings and their rental request totals. Listings
+                  with no bookings are shown here too.
+                </p>
+              </div>
+            </div>
+
+            {isInitialLoading ? (
+              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                <EquipmentCardSkeleton />
+                <EquipmentCardSkeleton />
+                <EquipmentCardSkeleton />
+              </div>
+            ) : ownerEquipment.length > 0 ? (
+              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                {ownerEquipment.map((equipment, index) => (
+                  <EquipmentCard
+                    key={equipment.id}
+                    equipment={equipment}
+                    index={index}
+                    reducedMotion={reducedMotion}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-dashed border-[#E6D8C8] bg-white px-4 py-5 dark:border-stone-700 dark:bg-[#111310]">
+                <p className="text-sm text-[#8B7B6B] dark:text-stone-400">
+                  You have not published any equipment yet.
+                </p>
+                <Link
+                  href="/dashboard/owner/add-equipment"
+                  className={buttonVariants({
+                    className:
+                      "rounded-lg bg-[#D9601B] font-bold text-white hover:bg-[#C2561B]",
+                  })}
+                >
+                  Add equipment
+                </Link>
+              </div>
+            )}
+          </motion.section>
 
           {error && bookings.length > 0 ? (
             <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 dark:border-red-900/60 dark:bg-red-950/20">
