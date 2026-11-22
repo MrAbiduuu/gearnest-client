@@ -38,9 +38,13 @@ export async function GET(request: Request) {
   }
 
   try {
-    const backendResponse = await fetch(`${getEquipmentApiBaseUrl()}/equipments`, {
-      cache: "no-store",
-    });
+    // Owners need pending and rejected submissions as well as approved ones.
+    const backendResponse = await fetch(
+      `${getEquipmentApiBaseUrl()}/equipments?status=all`,
+      {
+        cache: "no-store",
+      },
+    );
 
     if (!backendResponse.ok) {
       return Response.json(

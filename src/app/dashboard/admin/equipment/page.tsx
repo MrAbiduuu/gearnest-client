@@ -7,18 +7,23 @@ import {
   AlertTriangle,
   ArrowLeft,
   Boxes,
+  Check,
   ExternalLink,
   Factory,
   Hash,
+  Loader2,
   MapPin,
   Package,
   RefreshCw,
   Tag,
   UserRound,
+  X,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "@/components/ui/toast";
+import { updateAdminEquipmentStatus } from "@/lib/admin-equipment-api";
 import {
   fetchEquipments,
   type Equipment,
@@ -61,6 +66,12 @@ const getStatus = (equipment: Equipment): EquipmentStatus => {
   return value === "pending" || value === "rejected" ? value : "approved";
 };
 
+const canApprove = (status: EquipmentStatus) =>
+  status === "pending" || status === "rejected";
+
+const canReject = (status: EquipmentStatus) =>
+  status === "pending" || status === "approved";
+
 const coverImage = (equipment: Equipment) =>
   equipment.image?.trim() || equipment.images?.[0]?.trim() || FALLBACK_IMAGE;
 
@@ -99,8 +110,19 @@ const CardSkeleton = () => (
   </div>
 );
 
-const EquipmentCard = ({ equipment }: { equipment: Equipment }) => {
+type EquipmentCardProps = {
+  equipment: Equipment;
+  updatingId: string | null;
+  onModerate: (id: string, status: EquipmentStatus) => void;
+};
+
+const EquipmentCard = ({
+  equipment,
+  updatingId,
+  onModerate,
+}: EquipmentCardProps) => {
   const status = getStatus(equipment);
+  const isUpdating = updatingId === equipment._id;
 
   return (
     <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-green-900/5 dark:hover:shadow-black/20">
@@ -182,6 +204,38 @@ const EquipmentCard = ({ equipment }: { equipment: Equipment }) => {
           </span>
         </div>
 
+        <div className="mt-4 grid grid-cols-2 gap-2">
+          <Button
+            type="button"
+            size="sm"
+            disabled={isUpdating || !canApprove(status)}
+            onClick={() => onModerate(equipment._id, "approved")}
+            className="rounded-lg bg-[#166534] text-xs font-bold text-white hover:bg-[#14532D] disabled:opacity-50 dark:bg-lime-400 dark:text-[#17251C] dark:hover:bg-lime-300"
+          >
+            {isUpdating ? (
+              <Loader2 className="animate-spin" aria-hidden="true" />
+            ) : (
+              <Check aria-hidden="true" />
+            )}
+            Approve
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            disabled={isUpdating || !canReject(status)}
+            onClick={() => onModerate(equipment._id, "rejected")}
+            className="rounded-lg border-[#E6D8C8] bg-[#FCFAF7] text-xs font-bold text-[#8B3A22] hover:border-[#D9601B] hover:text-[#C2561B] disabled:opacity-50 dark:border-stone-700 dark:bg-stone-900 dark:text-red-300"
+          >
+            {isUpdating ? (
+              <Loader2 className="animate-spin" aria-hidden="true" />
+            ) : (
+              <X aria-hidden="true" />
+            )}
+            Reject
+          </Button>
+        </div>
+
         <div className="mt-5 flex items-center justify-between gap-3 border-t border-border pt-4">
           <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
             <Hash size={13} aria-hidden="true" />
@@ -212,13 +266,14 @@ const AllEquipmentPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [activeFilter, setActiveFilter] = useState<CatalogFilter>("all");
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
 
   const loadEquipments = useCallback(async (signal?: AbortSignal) => {
     setLoading(true);
     setError("");
 
     try {
-      const data = await fetchEquipments(signal);
+      const data = await fetchEquipments(signal, { status: "all" });
       setEquipments(data);
     } catch (loadError) {
       if (signal?.aborted) return;
@@ -237,6 +292,46 @@ const AllEquipmentPage = () => {
     queueMicrotask(() => void loadEquipments(controller.signal));
     return () => controller.abort();
   }, [loadEquipments]);
+
+  const moderateEquipment = useCallback(
+    async (id: string, status: EquipmentStatus) => {
+      if (updatingId) return;
+
+      setUpdatingId(id);
+
+      try {
+        const updated = await updateAdminEquipmentStatus(id, status);
+        setEquipments((current) =>
+          current.map((item) => (item._id === id ? updated : item)),
+        );
+
+        toast.add({
+          type: "success",
+          title:
+            status === "approved"
+              ? "Equipment approved"
+              : "Equipment rejected",
+          description: `${updated.name} is now ${status} and ${
+            status === "approved" ? "visible in the public catalog." : "hidden from the public catalog."
+          }`,
+          timeout: 5000,
+        });
+      } catch (moderationError) {
+        toast.add({
+          type: "error",
+          title: "Could not update listing",
+          description:
+            moderationError instanceof Error
+              ? moderationError.message
+              : "Please try again.",
+          timeout: 6000,
+        });
+      } finally {
+        setUpdatingId(null);
+      }
+    },
+    [updatingId],
+  );
 
   const counts = useMemo(() => {
     const result: Record<CatalogFilter, number> = {
@@ -380,7 +475,12 @@ const AllEquipmentPage = () => {
       ) : (
         <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
           {visibleEquipments.map((equipment) => (
-            <EquipmentCard key={equipment._id} equipment={equipment} />
+            <EquipmentCard
+              key={equipment._id}
+              equipment={equipment}
+              updatingId={updatingId}
+              onModerate={(id, status) => void moderateEquipment(id, status)}
+            />
           ))}
         </div>
       )}

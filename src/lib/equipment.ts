@@ -59,8 +59,14 @@ export const unwrapApiData = (payload: unknown): unknown =>
 
 export async function fetchEquipments(
   signal?: AbortSignal,
+  options?: { status?: "all" | EquipmentStatus },
 ): Promise<Equipment[]> {
-  const response = await fetch(`${getEquipmentApiBaseUrl()}/equipments`, {
+  const params = new URLSearchParams();
+  if (options?.status) params.set("status", options.status);
+  const search = params.toString();
+  const query = search ? `?${search}` : "";
+
+  const response = await fetch(`${getEquipmentApiBaseUrl()}/equipments${query}`, {
     signal,
     cache: "no-store",
   });

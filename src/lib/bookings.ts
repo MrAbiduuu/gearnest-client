@@ -71,7 +71,9 @@ export const getCustomerBookings = async (
 
   let equipments = [] as Awaited<ReturnType<typeof fetchEquipments>>;
   try {
-    equipments = await fetchEquipments();
+    // Booking history must keep its equipment name even if the listing is
+    // later pending or rejected on the public catalog.
+    equipments = await fetchEquipments(undefined, { status: "all" });
   } catch (error) {
     // Keep the history usable with IDs if the equipment service is offline.
     console.error("Could not load equipment for booking history", error);
