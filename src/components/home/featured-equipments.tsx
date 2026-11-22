@@ -1,6 +1,7 @@
 "use client";
 
 import FavoriteButton from "@/components/favorites/FavoriteButton";
+import { useSession } from "@/lib/auth-client";
 import { Equipment, fetchEquipments } from "@/lib/equipment";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
@@ -14,12 +15,15 @@ import {
 import Image from "next/image";
 import { motion, useReducedMotion } from "motion/react";
 
+const FEATURED_LIMIT = 6;
+
 const FeaturedEquipments = () => {
   const [items, setItems] = useState<Equipment[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [reloadCount, setReloadCount] = useState(0);
 
+  const { data: session, isPending: isSessionPending } = useSession();
   const shouldReduceMotion = useReducedMotion();
 
   useEffect(() => {
@@ -29,7 +33,9 @@ const FeaturedEquipments = () => {
       setLoading(true);
 
       try {
-        const data = await fetchEquipments(controller.signal);
+        const data = await fetchEquipments(controller.signal, {
+          limit: FEATURED_LIMIT,
+        });
         setItems(data);
         setError(null);
       } catch (caught) {
@@ -50,7 +56,15 @@ const FeaturedEquipments = () => {
     return () => controller.abort();
   }, [reloadCount]);
 
-  const featuredItems = items.slice(0, 4);
+  const featuredItems = items;
+
+  const detailsHref = (equipmentId: string) => {
+    const detailsPath = `/equipment/${equipmentId}`;
+
+    return session?.user
+      ? detailsPath
+      : `/signin?callbackUrl=${encodeURIComponent(detailsPath)}`;
+  };
 
   const formatPrice = (price: number) =>
     new Intl.NumberFormat("en-BD", {
@@ -97,7 +111,7 @@ const FeaturedEquipments = () => {
   };
 
   return (
-    <section className="bg-background py-20">
+    <section className="border-t border-border/60 bg-muted/20 py-20">
       <div className="mx-auto max-w-7xl px-5 md:px-8">
         {/* Section Heading */}
         <motion.div
@@ -111,7 +125,7 @@ const FeaturedEquipments = () => {
             <div className="mb-3 flex items-center gap-2">
               <span className="h-2 w-2 rounded-full bg-primary" />
               <span className="text-sm font-semibold uppercase tracking-[0.18em] text-primary">
-                Explore Our Collection
+                Curated For You
               </span>
             </div>
 
@@ -125,32 +139,37 @@ const FeaturedEquipments = () => {
             </p>
           </div>
 
-          <Link
-            href="/equipment"
-            className="group inline-flex w-fit items-center gap-2 text-sm font-semibold text-primary transition-colors hover:text-primary/80"
-          >
-            Explore All Equipment
-            <ArrowRight
-              size={17}
-              className="transition-transform group-hover:translate-x-1"
-            />
-          </Link>
+          <div className="flex items-center gap-4">
+            <span className="hidden rounded-full border border-border bg-card px-3 py-1.5 text-[11px] font-bold tracking-[0.14em] text-muted-foreground uppercase sm:inline-flex">
+              06 picks
+            </span>
+            <Link
+              href="/equipment"
+              className="group inline-flex w-fit items-center gap-2 text-sm font-semibold text-primary transition-colors hover:text-primary/80"
+            >
+              Explore All Equipment
+              <ArrowRight
+                size={17}
+                className="transition-transform group-hover:translate-x-1"
+              />
+            </Link>
+          </div>
         </motion.div>
 
         {/* Loading State */}
         {loading && (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {Array.from({ length: 4 }).map((_, index) => (
+          <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+            {Array.from({ length: FEATURED_LIMIT }).map((_, index) => (
               <div
                 key={index}
-                className="overflow-hidden rounded-2xl border border-border bg-card"
+                className="overflow-hidden rounded-3xl border border-border/70 bg-card"
               >
-                <div className="aspect-4/3 animate-pulse bg-muted" />
-                <div className="space-y-4 p-5">
-                  <div className="h-3 w-20 animate-pulse rounded bg-muted" />
+                <div className="aspect-16/11 animate-pulse bg-muted" />
+                <div className="space-y-4 p-6">
+                  <div className="h-3 w-24 animate-pulse rounded bg-muted" />
                   <div className="h-5 w-3/4 animate-pulse rounded bg-muted" />
                   <div className="h-3 w-full animate-pulse rounded bg-muted" />
-                  <div className="h-10 w-full animate-pulse rounded bg-muted" />
+                  <div className="h-9 w-full animate-pulse rounded-full bg-muted" />
                 </div>
               </div>
             ))}
@@ -159,7 +178,7 @@ const FeaturedEquipments = () => {
 
         {/* Error State */}
         {!loading && error && (
-          <div className="flex flex-col items-center justify-center rounded-2xl border border-border bg-card px-5 py-16 text-center">
+          <div className="flex flex-col items-center justify-center rounded-3xl border border-border bg-card px-5 py-16 text-center">
             <Package size={35} className="mb-4 text-muted-foreground" />
 
             <h3 className="text-lg font-semibold text-foreground">
@@ -170,7 +189,7 @@ const FeaturedEquipments = () => {
 
             <button
               onClick={() => setReloadCount((prev) => prev + 1)}
-              className="mt-6 inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
+              className="mt-6 inline-flex items-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
             >
               <RefreshCw size={16} />
               Try Again
@@ -180,7 +199,7 @@ const FeaturedEquipments = () => {
 
         {/* Empty State */}
         {!loading && !error && featuredItems.length === 0 && (
-          <div className="rounded-2xl border border-border bg-card py-16 text-center">
+          <div className="rounded-3xl border border-border bg-card py-16 text-center">
             <Package size={38} className="mx-auto mb-4 text-muted-foreground" />
             <h3 className="text-lg font-semibold text-foreground">
               No equipment available
@@ -194,7 +213,7 @@ const FeaturedEquipments = () => {
         {/* Equipment Cards */}
         {!loading && !error && featuredItems.length > 0 && (
           <div
-            className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4"
+            className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3"
             style={{ perspective: "1200px" }}
           >
             {featuredItems.map((equipment, index) => (
@@ -218,10 +237,12 @@ const FeaturedEquipments = () => {
                         },
                       }
                 }
-                className="group overflow-hidden rounded-2xl border border-border bg-card transition-shadow duration-300 hover:shadow-xl"
+                className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-border/70 bg-card shadow-[0_18px_45px_-32px_rgba(15,23,42,0.55)]"
               >
+                <span className="absolute inset-x-8 top-0 h-0.5 rounded-full bg-linear-to-r from-transparent via-primary to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+
                 {/* Equipment Image */}
-                <div className="relative aspect-4/3 overflow-hidden bg-muted">
+                <div className="relative aspect-16/11 overflow-hidden bg-muted">
                   <motion.div
                     className="h-full w-full"
                     initial={
@@ -243,20 +264,22 @@ const FeaturedEquipments = () => {
                     />
                   </motion.div>
 
-                  <span className="absolute left-3 top-3 rounded-full border border-white/30 bg-background/90 px-3 py-1.5 text-xs font-semibold text-foreground backdrop-blur-md">
+                  <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-black/45 via-transparent to-transparent" />
+
+                  <span className="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1.5 text-[10px] font-bold tracking-[0.12em] text-slate-800 uppercase shadow-sm backdrop-blur-md dark:bg-slate-900/85 dark:text-slate-100">
                     {equipment.category}
                   </span>
 
                   <FavoriteButton
                     equipment={equipment}
-                    className="top-auto bottom-3"
+                    className="top-auto bottom-4 left-4"
                   />
 
                   <span
-                    className={`absolute right-3 top-3 rounded-full px-3 py-1.5 text-xs font-semibold backdrop-blur-md ${
+                    className={`absolute right-4 top-4 rounded-full px-3 py-1.5 text-[10px] font-bold tracking-[0.08em] uppercase shadow-sm backdrop-blur-md ${
                       equipment.availableStock > 0
-                        ? "bg-green-500/90 text-white"
-                        : "bg-red-500/90 text-white"
+                        ? "bg-emerald-500/90 text-white"
+                        : "bg-rose-500/90 text-white"
                     }`}
                   >
                     {equipment.availableStock > 0 ? "Available" : "Unavailable"}
@@ -264,62 +287,89 @@ const FeaturedEquipments = () => {
                 </div>
 
                 {/* Equipment Information */}
-                <div className="p-5">
-                  <div className="mb-3 flex items-center justify-between gap-2">
-                    <span className="text-xs font-medium text-muted-foreground">
-                      {equipment.brand}
+                <div className="flex flex-1 flex-col p-5 sm:p-6">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-[10px] font-bold tracking-[0.2em] text-muted-foreground uppercase">
+                      No. {String(index + 1).padStart(2, "0")} ·{" "}
+                      {equipment.brand || "GearNest"}
                     </span>
 
                     {equipment.owner?.isVerified && (
-                      <span className="flex items-center gap-1 text-xs font-semibold text-primary">
-                        <ShieldCheck size={14} />
+                      <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-semibold text-primary">
+                        <ShieldCheck size={12} />
                         Verified
                       </span>
                     )}
                   </div>
 
-                  <h3 className="line-clamp-1 text-lg font-bold text-foreground transition-colors group-hover:text-primary">
+                  <h3 className="mt-3 line-clamp-1 text-xl font-bold tracking-tight text-foreground transition-colors group-hover:text-primary">
                     {equipment.name}
                   </h3>
 
-                  <p className="mt-2 line-clamp-2 min-h-10 text-sm leading-5 text-muted-foreground">
+                  <p className="mt-2 line-clamp-2 min-h-10 text-sm leading-6 text-muted-foreground">
                     {equipment.shortDescription}
                   </p>
 
-                  {/* Condition and Stock */}
-                  <div className="mt-4 flex items-center justify-between border-t border-border pt-4 text-xs text-muted-foreground">
-                    <span className="flex items-center gap-1.5">
-                      <Star size={14} className="text-primary" />
-                      {equipment.condition}
+                  <div className="mt-5 grid grid-cols-2 gap-3 border-y border-border/70 py-4">
+                    <span className="flex items-center gap-2.5">
+                      <span className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                        <Star size={14} />
+                      </span>
+                      <span className="min-w-0">
+                        <span className="block text-[9px] font-bold tracking-[0.14em] text-muted-foreground uppercase">
+                          Condition
+                        </span>
+                        <span className="block truncate text-xs font-semibold text-foreground">
+                          {equipment.condition}
+                        </span>
+                      </span>
                     </span>
 
-                    <span className="flex items-center gap-1.5">
-                      <Package size={14} />
-                      {equipment.availableStock} in stock
+                    <span className="flex items-center gap-2.5">
+                      <span className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                        <Package size={14} />
+                      </span>
+                      <span className="min-w-0">
+                        <span className="block text-[9px] font-bold tracking-[0.14em] text-muted-foreground uppercase">
+                          Stock
+                        </span>
+                        <span className="block truncate text-xs font-semibold text-foreground">
+                          {equipment.availableStock} units
+                        </span>
+                      </span>
                     </span>
                   </div>
 
-                  {/* Pricing and Details */}
-                  <div className="mt-5 flex items-center justify-between gap-3">
-                    <div>
-                      <p className="text-xl font-bold text-primary">
-                        {formatPrice(equipment.rentalRate)}
+                  <div className="mt-auto flex items-end justify-between gap-4 pt-5">
+                    <div className="min-w-0">
+                      <p className="text-[10px] font-bold tracking-[0.16em] text-muted-foreground uppercase">
+                        Rental from
                       </p>
-                      <p className="text-xs text-muted-foreground">
-                        / {equipment.rentalPeriod}
+                      <p className="mt-1 truncate text-2xl font-extrabold tracking-tight text-foreground">
+                        {formatPrice(equipment.rentalRate)}
+                        <span className="ml-1 text-xs font-medium text-muted-foreground">
+                          / {equipment.rentalPeriod}
+                        </span>
                       </p>
                     </div>
 
-                    <Link
-                      href={`/equipment/${equipment._id}`}
-                      className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2.5 text-xs font-semibold text-primary-foreground transition hover:opacity-90"
-                    >
-                      Details
-                      <ArrowRight
-                        size={14}
-                        className="transition-transform duration-300 group-hover:translate-x-1"
-                      />
-                    </Link>
+                    {isSessionPending ? (
+                      <span className="inline-flex shrink-0 cursor-wait items-center gap-2 rounded-full border border-primary/30 bg-primary/5 px-4 py-2.5 text-xs font-bold text-primary opacity-60">
+                        View Details
+                        <ArrowRight size={14} />
+                      </span>
+                    ) : (
+                      <Link
+                        href={detailsHref(equipment._id)}
+                        className="inline-flex shrink-0 items-center gap-2 rounded-full border border-primary/30 bg-primary/5 px-4 py-2.5 text-xs font-bold text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
+                      >
+                        View Details
+                        <ArrowRight
+                          size={14}
+                          className="transition-transform duration-300 group-hover:translate-x-1"
+                        />
+                      </Link>
+                    )}
                   </div>
                 </div>
               </motion.article>

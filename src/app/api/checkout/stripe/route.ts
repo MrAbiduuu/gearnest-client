@@ -1,10 +1,6 @@
 import { auth } from "@/lib/auth";
 import { fetchEquipmentById } from "@/lib/equipment";
-import {
-  hasPurchasedEquipment,
-  isValidEquipmentId,
-  toEquipmentObjectId,
-} from "@/lib/purchases";
+import { isValidEquipmentId } from "@/lib/purchases";
 import { getRentalQuote } from "@/lib/rental-pricing";
 
 /** Creates a Stripe Checkout session and returns its hosted payment URL. */
@@ -90,20 +86,6 @@ export async function POST(request: Request) {
       return Response.json(
         { success: false, message: "Requested quantity is not available." },
         { status: 400 },
-      );
-    }
-
-    const equipmentObjectId = toEquipmentObjectId(equipmentId);
-    if (
-      equipmentObjectId &&
-      (await hasPurchasedEquipment(session.user.id, equipmentObjectId))
-    ) {
-      return Response.json(
-        {
-          success: false,
-          message: "You already completed checkout for this equipment.",
-        },
-        { status: 409 },
       );
     }
 

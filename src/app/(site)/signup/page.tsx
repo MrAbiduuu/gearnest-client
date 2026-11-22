@@ -375,7 +375,7 @@ const SignUpPage = () => {
                   type="url"
                   value={photoUrl}
                   onChange={(event) => setPhotoUrl(event.target.value)}
-                  placeholder="https://example.com/your-photo.jpg"
+                  placeholder="https://example.com/your-photo.jpg (optional)"
                   className={inputClassName}
                 />
 
@@ -391,10 +391,10 @@ const SignUpPage = () => {
                     <p className="truncate text-sm font-medium text-foreground">
                       {isUploading
                         ? "Uploading photo..."
-                        : "Or upload to ImgBB"}
+                        : "Upload from your device"}
                     </p>
                     <p className="mt-0.5 text-xs text-muted-foreground">
-                      PNG, JPG or JPEG
+                      JPEG, PNG, WEBP or GIF · up to 10MB
                     </p>
                   </div>
                 </label>
@@ -403,16 +403,41 @@ const SignUpPage = () => {
                   id="photo-file"
                   name="photo-file"
                   type="file"
-                  accept="image/png,image/jpeg,image/jpg"
+                  accept="image/jpeg,image/png,image/webp,image/gif"
                   disabled={isUploading}
                   className="hidden"
                   onChange={handlePhotoUpload}
                 />
 
                 {photoUrl && (
-                  <p className="mt-2 truncate text-xs text-green-700 dark:text-lime-400">
-                    Photo link ready: {photoUrl}
-                  </p>
+                  <div className="mt-3 flex items-center gap-3 rounded-xl border border-green-200 bg-green-50/60 p-3 dark:border-green-800 dark:bg-green-900/20">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={photoUrl}
+                      alt="Selected profile photo"
+                      className="size-14 shrink-0 rounded-lg border border-border object-cover"
+                      onError={(event) => {
+                        event.currentTarget.src = "/equipment-fallback.svg";
+                      }}
+                    />
+
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-semibold text-green-800 dark:text-lime-300">
+                        Photo link ready
+                      </p>
+                      <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                        {photoUrl}
+                      </p>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => setPhotoUrl("")}
+                      className="shrink-0 text-xs font-bold text-red-600 transition hover:text-red-700 dark:text-red-400"
+                    >
+                      Remove
+                    </button>
+                  </div>
                 )}
               </div>
 

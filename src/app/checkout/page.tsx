@@ -1,13 +1,7 @@
 import Link from "next/link";
-import { headers } from "next/headers";
 import { ArrowLeft, PackageSearch } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { fetchEquipmentById, getAvailableStock } from "@/lib/equipment";
-import {
-  getSessionUserIdFromHeaders,
-  hasPurchasedEquipment,
-  toEquipmentObjectId,
-} from "@/lib/purchases";
 import { getRentalQuote } from "@/lib/rental-pricing";
 import CheckoutPayment from "./checkout-payment";
 
@@ -77,28 +71,6 @@ const CheckoutPage = async ({ searchParams }: CheckoutPageProps) => {
       <CheckoutProblem
         title="No rental details selected"
         description="Choose equipment and rental dates from the catalog to start a secure checkout."
-      />
-    );
-  }
-
-  const requestHeaders = await headers();
-  const userId = await getSessionUserIdFromHeaders(requestHeaders);
-  const equipmentObjectId = toEquipmentObjectId(equipmentId);
-
-  let alreadyPurchased = false;
-  if (userId && equipmentObjectId) {
-    try {
-      alreadyPurchased = await hasPurchasedEquipment(userId, equipmentObjectId);
-    } catch (error) {
-      console.error("Could not check purchase status during checkout", error);
-    }
-  }
-
-  if (alreadyPurchased) {
-    return (
-      <CheckoutProblem
-        title="Checkout already completed"
-        description="You already bought this equipment. Its checkout button is now disabled."
       />
     );
   }

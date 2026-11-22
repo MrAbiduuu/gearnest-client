@@ -3,6 +3,7 @@ import { Plus_Jakarta_Sans } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import Navbar from "@/components/shared/navbar";
+import WelcomePopup from "@/components/shared/WelcomePopup";
 import { FavoritesProvider } from "@/components/favorites/FavoritesProvider";
 import { Toaster } from "@/components/ui/toast";
 
@@ -31,6 +32,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <Toaster>
           <FavoritesProvider>{children}</FavoritesProvider>
         </Toaster>
+        <WelcomePopup />
       </body>
     </html>
   );

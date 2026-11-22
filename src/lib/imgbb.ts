@@ -1,46 +1,51 @@
-type ImgBbResponse = {
+const MAX_FILE_SIZE = 10 * 1024 * 1024;
+
+const ALLOWED_IMAGE_TYPES = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+]);
+
+type UploadResponse = {
   success?: boolean;
-  data?: {
-    display_url?: string;
-    url?: string;
-  };
-  error?: {
-    message?: string;
-  };
+  message?: string;
+  data?: { url?: string };
 };
 
+/**
+ * Send a device-selected image through the Next.js API route so the ImgBB key
+ * stays server-side and the browser never has to call ImgBB directly.
+ */
 export async function uploadImageToImgBb(file: File): Promise<string> {
-  const apiKey = process.env.NEXT_PUBLIC_IMGBB_API_KEY;
+  if (!ALLOWED_IMAGE_TYPES.has(file.type)) {
+    throw new Error("Choose a JPEG, PNG, WEBP, or GIF image.");
+  }
 
-  if (!apiKey) {
-    throw new Error(
-      "ImgBB upload is not configured. Paste a direct image link instead.",
-    );
+  if (file.size === 0) {
+    throw new Error("Choose a valid image file.");
+  }
+
+  if (file.size > MAX_FILE_SIZE) {
+    throw new Error("Images must be 10MB or smaller.");
   }
 
   const formData = new FormData();
   formData.append("image", file);
 
-  const response = await fetch(
-    `https://api.imgbb.com/1/upload?key=${encodeURIComponent(apiKey)}`,
-    {
-      method: "POST",
-      body: formData,
-    },
-  );
+  const response = await fetch("/api/upload/imgbb", {
+    method: "POST",
+    body: formData,
+    cache: "no-store",
+  });
 
-  if (!response.ok) {
-    throw new Error("Photo upload failed. Try another image or use a direct link.");
-  }
+  const payload = (await response.json().catch(() => null)) as UploadResponse | null;
 
-  const result: ImgBbResponse = await response.json();
-  const imageUrl = result.data?.display_url ?? result.data?.url;
-
-  if (!result.success || !imageUrl) {
+  if (!response.ok || !payload?.success || !payload.data?.url) {
     throw new Error(
-      result.error?.message ?? "Photo upload failed. Please try again.",
+      payload?.message ?? "Photo upload failed. Please try again.",
     );
   }
 
-  return imageUrl;
+  return payload.data.url;
 }

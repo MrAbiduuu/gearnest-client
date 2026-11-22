@@ -4,20 +4,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { LayoutDashboard, LogOut, Menu, Search, X } from "lucide-react";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/toast";
 import { signOut, useSession } from "@/lib/auth-client";
 import ThemeToggle from "./themeToggle";
+import NavLinks, { NavLinksFallback } from "./nav-links";
 import { FaSuitcase } from "react-icons/fa";
-
-const navLinks = [
-  { href: "/", label: "Home" },
-  { href: "/equipment", label: "All Equipment" },
-  { href: "/about", label: "About Us" },
-  { href: "/contact", label: "Contact Us" },
-  { href: "/#how-it-works", label: "How It Works" },
-];
 
 type NavbarUser = {
   name?: string | null;
@@ -183,19 +176,9 @@ const Navbar = () => {
           aria-label="Main navigation"
           className="hidden items-center gap-5 lg:flex xl:gap-7"
         >
-          {navLinks.map(({ href, label }) => (
-            <Link
-              key={href}
-              href={href}
-              className={`text-sm transition hover:text-lime-700 dark:hover:text-lime-300 ${
-                href === "/"
-                  ? "font-semibold text-green-800 dark:text-lime-300"
-                  : "font-medium text-muted-foreground"
-              }`}
-            >
-              {label}
-            </Link>
-          ))}
+          <Suspense fallback={<NavLinksFallback variant="desktop" />}>
+            <NavLinks variant="desktop" />
+          </Suspense>
         </nav>
 
         {/* Right Actions */}
@@ -312,20 +295,13 @@ const Navbar = () => {
         >
           <div className="mx-auto flex max-w-360 flex-col gap-1 border-t border-border bg-background px-4 pb-5 pt-3 shadow-lg dark:border-green-900/60 sm:px-6">
             {/* Navigation Links */}
-            {navLinks.map(({ href, label }) => (
-              <Link
-                key={href}
-                href={href}
-                onClick={closeMenu}
-                className={`rounded-lg px-3 py-2.5 text-sm transition hover:bg-muted hover:text-green-700 dark:hover:bg-green-900/40 dark:hover:text-lime-300 ${
-                  href === "/"
-                    ? "font-semibold text-green-800 dark:text-lime-300"
-                    : "font-medium text-muted-foreground"
-                }`}
-              >
-                {label}
-              </Link>
-            ))}
+            <Suspense
+              fallback={
+                <NavLinksFallback variant="mobile" onNavigate={closeMenu} />
+              }
+            >
+              <NavLinks variant="mobile" onNavigate={closeMenu} />
+            </Suspense>
 
             {/* Session Actions */}
             {isPending ? (

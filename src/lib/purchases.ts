@@ -2,8 +2,8 @@
  * Server-side purchase records.
  *
  * A purchase is created only after Stripe confirms a paid Checkout Session.
- * The record is keyed by the authenticated GearNest user and the equipment so
- * the rental panel can disable checkout once that customer has bought it.
+ * Each paid session creates its own booking record, so a customer can rent the
+ * same equipment again whenever stock is available.
  *
  * The same record also drives stock: the bought quantity is deducted from the
  * equipment immediately and returned automatically after 24 hours.
@@ -44,21 +44,37 @@ const ensurePurchaseIndexes = async () => {
   if (!indexPromise) {
     const collection = db.collection<PurchaseDocument>(PURCHASES_COLLECTION);
 
-    indexPromise = Promise.all([
-      collection.createIndex(
-        { userId: 1, equipmentId: 1 },
-        { unique: true, name: "userId_1_equipmentId_1" },
-      ),
-      collection.createIndex(
-        { stripeSessionId: 1 },
-        { unique: true, name: "stripeSessionId_1" },
-      ),
-      collection.createIndex({ restoreAt: 1, restoredAt: 1 }),
-    ])
+    indexPromise = (async () => {
+      // Older data had a one-purchase-per-user-per-equipment constraint.
+      // Drop it so repeat rentals can create separate booking records.
+      const indexes = await collection.indexes();
+      const legacyUniqueIndex = indexes.find(
+        (index) =>
+          index.unique === true &&
+          index.key.userId === 1 &&
+          index.key.equipmentId === 1,
+      );
+
+      if (legacyUniqueIndex?.name) {
+        await collection.dropIndex(legacyUniqueIndex.name);
+      }
+
+      await Promise.all([
+        collection.createIndex(
+          { userId: 1, equipmentId: 1 },
+          { name: "userId_1_equipmentId_lookup" },
+        ),
+        collection.createIndex(
+          { stripeSessionId: 1 },
+          { unique: true, name: "stripeSessionId_1" },
+        ),
+        collection.createIndex({ restoreAt: 1, restoredAt: 1 }),
+      ]);
+    })()
       .then(() => undefined)
       .catch((error: unknown) => {
         indexPromise = null;
-        console.error("Could not create purchases indexes", error);
+        console.error("Could not prepare purchases indexes", error);
       });
   }
 
@@ -233,16 +249,4 @@ export const restoreExpiredPurchases = async (): Promise<number> => {
   }
 
   return restored;
-};
-
-export const hasPurchasedEquipment = async (
-  userId: string,
-  equipmentId: ObjectId,
-): Promise<boolean> => {
-  const purchase = await purchasesCollection().findOne(
-    { userId, equipmentId },
-    { projection: { _id: 1 } },
-  );
-
-  return purchase !== null;
 };

@@ -68,10 +68,13 @@ export const unwrapApiData = (payload: unknown): unknown =>
 
 export async function fetchEquipments(
   signal?: AbortSignal,
-  options?: { status?: "all" | EquipmentStatus },
+  options?: { status?: "all" | EquipmentStatus; limit?: number },
 ): Promise<Equipment[]> {
   const params = new URLSearchParams();
   if (options?.status) params.set("status", options.status);
+  if (options?.limit && Number.isInteger(options.limit) && options.limit > 0) {
+    params.set("limit", String(options.limit));
+  }
   const search = params.toString();
   const query = search ? `?${search}` : "";
 
