@@ -73,6 +73,40 @@ export type AdminMonthlyBookingsResponse = {
   data: AdminMonthlyBookingsData;
 };
 
+export type AdminMonthlyRevenuePoint = {
+  month: string;
+  monthNumber: number;
+  /** Major currency units, converted from Stripe minor units by the API. */
+  revenue: number;
+};
+
+export type AdminCurrencyBreakdown = {
+  currency: string;
+  transactions: number;
+  totalRevenue: number;
+};
+
+export type AdminMonthlyRevenueData = {
+  year: number;
+  availableYears: number[];
+  monthlyRevenue: AdminMonthlyRevenuePoint[];
+  /** Actual dominant currency stored on the included payment records. */
+  currency: string;
+  currencyBreakdown: AdminCurrencyBreakdown[];
+  timezone: string;
+  revenueBasis: string;
+  excludedStatuses: {
+    payments: string[];
+    bookings: string[];
+  };
+};
+
+export type AdminMonthlyRevenueResponse = {
+  success: boolean;
+  message: string;
+  data: AdminMonthlyRevenueData;
+};
+
 export class AdminAnalyticsRequestError extends Error {
   readonly status: number;
 
@@ -140,4 +174,28 @@ export async function fetchAdminMonthlyBookings(
   }
 
   return (await response.json()) as AdminMonthlyBookingsResponse;
+}
+
+export async function fetchAdminMonthlyRevenue(
+  year: number,
+  signal?: AbortSignal,
+): Promise<AdminMonthlyRevenueResponse> {
+  const query = new URLSearchParams({ year: String(year) });
+  const response = await fetch(
+    `${ANALYTICS_BASE_URL}/monthly-revenue?${query}`,
+    {
+      signal,
+      credentials: "include",
+      cache: "no-store",
+    },
+  );
+
+  if (!response.ok) {
+    throw new AdminAnalyticsRequestError(
+      await getErrorMessage(response, "Could not load monthly revenue."),
+      response.status,
+    );
+  }
+
+  return (await response.json()) as AdminMonthlyRevenueResponse;
 }
