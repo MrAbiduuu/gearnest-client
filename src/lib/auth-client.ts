@@ -3,7 +3,9 @@ import { inferAdditionalFields } from "better-auth/client/plugins";
 import type { auth } from "@/lib/auth";
 
 export const authClient = createAuthClient({
-  baseURL: process.env.NEXT_PUBLIC_BETTER_AUTH_URL,
+  baseURL:
+    process.env.NEXT_PUBLIC_BETTER_AUTH_URL ??
+    "https://gearnest-client-opal.vercel.app",
   plugins: [inferAdditionalFields<typeof auth>()],
 });
 

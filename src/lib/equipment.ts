@@ -52,7 +52,7 @@ export const getAvailableStock = (
   return Number.isFinite(value) ? Math.max(0, Math.floor(value)) : 0;
 };
 
-const DEFAULT_API_BASE_URL = "http://localhost:5000";
+const DEFAULT_API_BASE_URL = "https://gearnest-server-umber.vercel.app";
 
 export const getEquipmentApiBaseUrl = () =>
   (process.env.NEXT_PUBLIC_EQUIPMENT_API_URL ?? DEFAULT_API_BASE_URL).replace(
