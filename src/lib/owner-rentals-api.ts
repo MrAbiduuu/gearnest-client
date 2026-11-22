@@ -68,6 +68,7 @@ export type OwnerRentalEquipment = {
   requestCount: number;
   pendingRequests: number;
   confirmedRequests: number;
+  completedRequests: number;
   cancelledRequests: number;
   /** At least one confirmed request exists for this listing. */
   isOnRent: boolean;

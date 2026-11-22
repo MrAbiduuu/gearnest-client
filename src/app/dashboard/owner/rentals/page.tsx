@@ -65,6 +65,7 @@ const filters: { key: OwnerRentalStatusFilter; label: string }[] = [
   { key: "all", label: "All" },
   { key: "pending", label: "Pending" },
   { key: "confirmed", label: "Confirmed" },
+  { key: "completed", label: "Completed" },
   { key: "cancelled", label: "Cancelled" },
 ];
 
@@ -73,6 +74,8 @@ const bookingStatusStyles: Record<OwnerRentalStatus, string> = {
     "border-orange-200 bg-orange-50 text-orange-700 dark:border-orange-900/60 dark:bg-orange-950/30 dark:text-orange-300",
   confirmed:
     "border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-900/60 dark:bg-blue-950/30 dark:text-blue-300",
+  completed:
+    "border-teal-200 bg-teal-50 text-teal-700 dark:border-teal-900/60 dark:bg-teal-950/30 dark:text-teal-300",
   cancelled:
     "border-red-200 bg-red-50 text-red-700 dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-300",
 };
@@ -88,6 +91,7 @@ const paymentStatusStyles: Record<RentalBooking["payment"]["status"], string> = 
 const actionStatusStyles: Record<OwnerRentalStatus, string> = {
   pending: "text-orange-700 dark:text-orange-300",
   confirmed: "text-blue-700 dark:text-blue-300",
+  completed: "text-teal-700 dark:text-teal-300",
   cancelled: "text-red-700 dark:text-red-300",
 };
 
@@ -110,6 +114,7 @@ const emptyCounts: RentalStatistics["statusCounts"] = {
   all: 0,
   pending: 0,
   confirmed: 0,
+  completed: 0,
   cancelled: 0,
 };
 
@@ -156,6 +161,7 @@ const getErrorMessage = (caught: unknown, fallback: string) =>
 const actionLabel = (status: OwnerRentalStatus) => {
   if (status === "pending") return "Pending Approval";
   if (status === "confirmed") return "Confirmed";
+  if (status === "completed") return "Completed";
   return "Cancelled";
 };
 
@@ -164,6 +170,9 @@ const ActionIcon = ({ status }: { status: OwnerRentalStatus }) => {
     return <Clock3 aria-hidden="true" className="size-4" />;
   }
   if (status === "confirmed") {
+    return <CheckCircle2 aria-hidden="true" className="size-4" />;
+  }
+  if (status === "completed") {
     return <CheckCircle2 aria-hidden="true" className="size-4" />;
   }
   return <XCircle aria-hidden="true" className="size-4" />;
@@ -293,7 +302,7 @@ const EquipmentCard = ({
     <p className="mt-2 text-[11px] text-[#9A8A79] dark:text-stone-500">
       {equipment.requestCount === 0
         ? "No rental requests yet"
-        : `${formatCount(equipment.pendingRequests)} pending · ${formatCount(equipment.confirmedRequests)} confirmed · ${formatCount(equipment.cancelledRequests)} cancelled`}
+        : `${formatCount(equipment.pendingRequests)} pending · ${formatCount(equipment.confirmedRequests)} confirmed · ${formatCount(equipment.completedRequests)} completed · ${formatCount(equipment.cancelledRequests)} cancelled`}
     </p>
 
     <Link

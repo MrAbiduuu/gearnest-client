@@ -55,6 +55,7 @@ const filters: { key: AdminBookingStatusFilter; label: string }[] = [
   { key: "all", label: "All" },
   { key: "pending", label: "Pending" },
   { key: "confirmed", label: "Confirmed" },
+  { key: "completed", label: "Completed" },
   { key: "cancelled", label: "Cancelled" },
 ];
 
@@ -63,6 +64,8 @@ const statusStyles: Record<BookingStatus, string> = {
     "border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-200",
   confirmed:
     "border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-900/60 dark:bg-emerald-950/30 dark:text-emerald-200",
+  completed:
+    "border-teal-200 bg-teal-50 text-teal-800 dark:border-teal-900/60 dark:bg-teal-950/30 dark:text-teal-200",
   cancelled:
     "border-stone-200 bg-stone-100 text-stone-600 dark:border-stone-700 dark:bg-stone-800/50 dark:text-stone-300",
 };
@@ -77,6 +80,7 @@ const emptyCounts: AdminBookingsData["statusCounts"] = {
   all: 0,
   pending: 0,
   confirmed: 0,
+  completed: 0,
   cancelled: 0,
 };
 
@@ -120,6 +124,9 @@ const capitalize = (value: string) =>
 const normalizeStatus = (value: string): BookingStatus => {
   const normalized = value.toLowerCase();
   if (normalized === "pending") return "pending";
+  if (normalized === "completed" || normalized === "complete") {
+    return "completed";
+  }
   if (normalized === "cancelled" || normalized === "canceled") {
     return "cancelled";
   }

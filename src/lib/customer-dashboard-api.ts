@@ -7,7 +7,11 @@ import { authenticatedFetch } from "@/lib/authenticated-api";
 
 const CUSTOMER_DASHBOARD_BASE_PATH = "/customer/dashboard";
 
-export type CustomerBookingStatus = "pending" | "confirmed" | "cancelled";
+export type CustomerBookingStatus =
+  | "pending"
+  | "confirmed"
+  | "completed"
+  | "cancelled";
 export type CustomerBookingPeriod = "3months" | "6months" | "12months";
 
 export type CustomerCurrencyBreakdown = {
@@ -21,6 +25,7 @@ export type CustomerDashboardOverview = {
   totalBookings: number;
   pendingBookings: number;
   confirmedBookings: number;
+  completedBookings: number;
   cancelledBookings: number;
   favoriteItems: number;
   /** Gross paid rental volume in major currency units, not a payout. */
@@ -43,6 +48,7 @@ export type CustomerBookingStatusData = {
     all: number;
     pending: number;
     confirmed: number;
+    completed: number;
     cancelled: number;
   };
   bookingStatusesIncluded: CustomerBookingStatus[];
@@ -58,6 +64,7 @@ export type CustomerMonthlyBookingPoint = {
   totalBookings: number;
   pendingBookings: number;
   confirmedBookings: number;
+  completedBookings: number;
   cancelledBookings: number;
 };
 

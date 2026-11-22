@@ -10,7 +10,7 @@ import { authenticatedFetch } from "@/lib/authenticated-api";
 const ANALYTICS_BASE_PATH = "/admin/analytics";
 
 export type UserRole = "customer" | "owner" | "admin";
-export type BookingStatus = "pending" | "confirmed" | "cancelled";
+export type BookingStatus = "pending" | "confirmed" | "completed" | "cancelled";
 export type PaymentStatus = "paid" | "unpaid" | "refunded";
 
 export type AdminMonthlyBooking = {
@@ -43,6 +43,7 @@ export type AdminAnalyticsOverview = {
   pendingEquipment: number;
   totalBookings: number;
   confirmedBookings: number;
+  completedBookings: number;
   pendingBookings: number;
   paidTransactions: number;
   /** Major currency units, aggregated from successful payments. */

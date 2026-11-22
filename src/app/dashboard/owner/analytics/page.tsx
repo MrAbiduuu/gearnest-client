@@ -486,6 +486,14 @@ const OwnerAnalyticsPage = () => {
         textClassName: "text-blue-700 dark:text-blue-300",
       },
       {
+        key: "completed",
+        label: "Completed",
+        value: overview?.completedBookings ?? 0,
+        icon: CheckCircle2,
+        barClassName: "bg-teal-500",
+        textClassName: "text-teal-700 dark:text-teal-300",
+      },
+      {
         key: "cancelled",
         label: "Cancelled",
         value: overview?.cancelledBookings ?? 0,
@@ -596,7 +604,7 @@ const OwnerAnalyticsPage = () => {
           value={formatCount(overview?.totalBookings ?? 0)}
           support={
             overview
-              ? `${formatCount(overview.confirmedBookings)} confirmed requests`
+              ? `${formatCount(overview.confirmedBookings)} confirmed · ${formatCount(overview.completedBookings)} completed`
               : "—"
           }
           icon={CalendarCheck2}

@@ -43,6 +43,9 @@ const normalizeStatus = (value?: string): BookingStatus => {
   switch (value?.toLowerCase()) {
     case "pending":
       return "pending";
+    case "completed":
+    case "complete":
+      return "completed";
     case "cancelled":
     case "canceled":
       return "cancelled";
@@ -125,7 +128,9 @@ export const getCustomerBookings = async (
           ? document.amountTotal / 100
           : 0,
       createdAt: document.createdAt?.toISOString(),
-      canReview: status === "confirmed" && paymentStatus === "paid",
+      canReview:
+        (status === "confirmed" || status === "completed") &&
+        paymentStatus === "paid",
     };
   });
 };

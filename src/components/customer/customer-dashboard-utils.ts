@@ -57,12 +57,15 @@ export const bookingStatusStyles: Record<CustomerBookingStatus, string> = {
     "border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-800/60 dark:bg-amber-900/25 dark:text-amber-200",
   confirmed:
     "border-blue-200 bg-blue-50 text-blue-800 dark:border-blue-800/60 dark:bg-blue-950/30 dark:text-blue-200",
+  completed:
+    "border-teal-200 bg-teal-50 text-teal-800 dark:border-teal-800/60 dark:bg-teal-950/30 dark:text-teal-200",
   cancelled:
     "border-red-200 bg-red-50 text-red-700 dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-300",
 };
 
 export const bookingStatusColors: Record<CustomerBookingStatus, string> = {
   confirmed: "#2563EB",
+  completed: "#0D9488",
   pending: "#F59E0B",
   cancelled: "#DC2626",
 };

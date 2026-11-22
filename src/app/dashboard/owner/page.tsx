@@ -56,6 +56,8 @@ const bookingStatusStyles: Record<OwnerBookingStatus, string> = {
     "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-300",
   confirmed:
     "border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-800 dark:bg-blue-950/40 dark:text-blue-300",
+  completed:
+    "border-teal-200 bg-teal-50 text-teal-700 dark:border-teal-800 dark:bg-teal-950/40 dark:text-teal-300",
   cancelled:
     "border-red-200 bg-red-50 text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300",
 };
@@ -825,9 +827,9 @@ const OwnerDashboardPage = () => {
       </div>
 
       <p className="text-[11px] leading-5 text-[#9A8A79] dark:text-stone-500">
-        Completed rentals are confirmed bookings with successful payments.
-        GearNest does not store owner payouts or commission, so paid rental
-        volume is not money already received by the owner.
+        Completed rentals are finished bookings, plus legacy paid confirmed
+        bookings. GearNest does not store owner payouts or commission, so paid
+        rental volume is not money already received by the owner.
       </p>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

@@ -1,6 +1,6 @@
 /** Shared booking view types used by the server loader and the dashboard UI. */
 
-export type BookingStatus = "pending" | "confirmed" | "cancelled";
+export type BookingStatus = "pending" | "confirmed" | "completed" | "cancelled";
 
 export type BookingPaymentStatus = "paid" | "unpaid" | "refunded";
 

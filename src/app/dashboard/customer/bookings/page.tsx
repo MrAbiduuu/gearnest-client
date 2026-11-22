@@ -39,6 +39,7 @@ const filters: { key: FilterKey; label: string }[] = [
   { key: "all", label: "All" },
   { key: "pending", label: "Pending" },
   { key: "confirmed", label: "Confirmed" },
+  { key: "completed", label: "Completed" },
   { key: "cancelled", label: "Cancelled" },
 ];
 
@@ -53,6 +54,8 @@ type BookingPageState = {
 const statusStyles: Record<BookingStatus, string> = {
   confirmed:
     "border-green-200 bg-green-50 text-green-800 dark:border-green-800 dark:bg-green-900/40 dark:text-lime-200",
+  completed:
+    "border-teal-200 bg-teal-50 text-teal-800 dark:border-teal-800 dark:bg-teal-950/30 dark:text-teal-200",
   pending:
     "border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-800/60 dark:bg-amber-900/25 dark:text-amber-200",
   cancelled:
@@ -277,7 +280,7 @@ const MyBookingsPage = () => {
   const [activeFilter, setActiveFilter] = useState<FilterKey>("all");
   const [pageState, setPageState] = useState<BookingPageState | null>(null);
 
-  // Status summary cards link here with ?status=pending|confirmed|cancelled.
+  // Status summary cards link here with ?status=pending|confirmed|completed|cancelled.
   useEffect(() => {
     const requestedStatus = new URLSearchParams(window.location.search).get(
       "status",
@@ -285,6 +288,7 @@ const MyBookingsPage = () => {
     if (
       requestedStatus === "pending" ||
       requestedStatus === "confirmed" ||
+      requestedStatus === "completed" ||
       requestedStatus === "cancelled"
     ) {
       // Defer the update so effects do not update state synchronously.
@@ -337,6 +341,8 @@ const MyBookingsPage = () => {
       pending: bookings.filter((booking) => booking.status === "pending")
         .length,
       confirmed: bookings.filter((booking) => booking.status === "confirmed")
+        .length,
+      completed: bookings.filter((booking) => booking.status === "completed")
         .length,
       cancelled: bookings.filter((booking) => booking.status === "cancelled")
         .length,

@@ -22,12 +22,14 @@ import type {
 
 const statusConfig = {
   confirmed: { label: "Confirmed", color: bookingStatusColors.confirmed },
+  completed: { label: "Completed", color: bookingStatusColors.completed },
   pending: { label: "Pending", color: bookingStatusColors.pending },
   cancelled: { label: "Cancelled", color: bookingStatusColors.cancelled },
 } satisfies ChartConfig;
 
 const statusOrder: CustomerBookingStatus[] = [
   "confirmed",
+  "completed",
   "pending",
   "cancelled",
 ];

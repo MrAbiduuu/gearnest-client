@@ -36,6 +36,8 @@ const FALLBACK_IMAGE = "/equipment-fallback.svg";
 const statusStyles: Record<BookingStatus, string> = {
   confirmed:
     "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300",
+  completed:
+    "border-teal-200 bg-teal-50 text-teal-700 dark:border-teal-800 dark:bg-teal-950/40 dark:text-teal-300",
   pending:
     "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-300",
   cancelled:
@@ -86,6 +88,7 @@ const capitalize = (value: string) =>
 const normalizeBookingStatus = (value: string): BookingStatus => {
   const normalized = value.toLowerCase();
   if (normalized === "pending") return "pending";
+  if (normalized === "completed" || normalized === "complete") return "completed";
   if (normalized === "cancelled" || normalized === "canceled") return "cancelled";
   return "confirmed";
 };
@@ -536,7 +539,7 @@ const AdminDashboardPage = () => {
       support: hasData
         ? `${formatCount(data?.confirmedBookings ?? 0)} confirmed · ${formatCount(
             data?.pendingBookings ?? 0,
-          )} pending`
+          )} pending · ${formatCount(data?.completedBookings ?? 0)} completed`
         : "Unavailable",
       icon: CalendarCheck2,
       iconClassName:

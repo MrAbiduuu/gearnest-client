@@ -298,6 +298,15 @@ const CustomerDashboardPage = () => {
       href: "/dashboard/customer/bookings?status=confirmed",
     },
     {
+      title: "Completed Bookings",
+      value: formatCount(statusData?.statusCounts.completed ?? 0),
+      support: "Rental finished",
+      icon: CheckCircle2,
+      iconClassName:
+        "bg-teal-50 text-teal-700 dark:bg-teal-950/40 dark:text-teal-300",
+      href: "/dashboard/customer/bookings?status=completed",
+    },
+    {
       title: "Cancelled Bookings",
       value: formatCount(statusData?.statusCounts.cancelled ?? 0),
       support: "No longer active",
@@ -347,7 +356,7 @@ const CustomerDashboardPage = () => {
       ) : (
         <section
           aria-label="Booking status summary"
-          className="grid gap-4 md:grid-cols-3"
+          className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
         >
           {statusCards.map((card, index) => (
             <CustomerBookingStatusCard

@@ -9,7 +9,11 @@ import { authenticatedFetch } from "@/lib/authenticated-api";
 const OWNER_DASHBOARD_BASE_PATH = "/owner/dashboard";
 
 export type OwnerEquipmentStatus = "approved" | "pending" | "rejected";
-export type OwnerBookingStatus = "pending" | "confirmed" | "cancelled";
+export type OwnerBookingStatus =
+  | "pending"
+  | "confirmed"
+  | "completed"
+  | "cancelled";
 export type OwnerPaymentStatus = "paid" | "unpaid" | "refunded";
 
 export type OwnerRecentBooking = {
@@ -48,6 +52,7 @@ export type OwnerDashboardOverview = {
   totalBookings: number;
   pendingBookings: number;
   confirmedBookings: number;
+  completedBookings: number;
   cancelledBookings: number;
   completedRentals: number;
   paidTransactions: number;
@@ -69,6 +74,7 @@ export type OwnerMonthlyBookingPoint = {
   totalBookings: number;
   pendingBookings: number;
   confirmedBookings: number;
+  completedBookings: number;
   cancelledBookings: number;
 };
 
