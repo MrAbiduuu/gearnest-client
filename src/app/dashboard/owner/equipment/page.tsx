@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useCallback, useEffect, useState } from "react";
+import React, { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
   AlertCircle,
   ArrowRight,
@@ -37,6 +38,28 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/components/ui/toast";
 
 const FALLBACK_IMAGE = "/equipment-fallback.svg";
+
+type EquipmentFilter = "all" | "approved" | "pending" | "rejected" | "available";
+
+const filterLabels: Record<EquipmentFilter, string> = {
+  all: "All listings",
+  approved: "Approved",
+  pending: "Pending",
+  rejected: "Rejected",
+  available: "In stock",
+};
+
+const parseFilter = (value: string | null): EquipmentFilter => {
+  switch (value) {
+    case "approved":
+    case "pending":
+    case "rejected":
+    case "available":
+      return value;
+    default:
+      return "all";
+  }
+};
 
 const statusStyles: Record<EquipmentStatus, string> = {
   approved:
@@ -96,12 +119,22 @@ const CardSkeleton = () => (
   </div>
 );
 
-const MyEquipmentPage = () => {
+const MyEquipmentPageContent = () => {
+  const searchParams = useSearchParams();
+  const filter = parseFilter(searchParams.get("status"));
   const [equipments, setEquipments] = useState<Equipment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [pendingDelete, setPendingDelete] = useState<Equipment | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  const visibleEquipments = useMemo(() => {
+    if (filter === "all") return equipments;
+    if (filter === "available") {
+      return equipments.filter((item) => Number(item.availableStock) > 0);
+    }
+    return equipments.filter((item) => getStatus(item) === filter);
+  }, [equipments, filter]);
 
   const loadEquipments = useCallback(async (signal?: AbortSignal) => {
     setLoading(true);
@@ -166,12 +199,17 @@ const MyEquipmentPage = () => {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground">
-            Your Equipment Listings ({equipments.length})
+            Your Equipment Listings ({visibleEquipments.length})
           </h1>
           <p className="mt-1.5 text-sm text-muted-foreground">
             Update rental prices, stock inventory, and review admin approval
             status.
           </p>
+          {filter !== "all" ? (
+            <p className="mt-1 text-xs font-semibold text-[#C2561B]">
+              Showing {filterLabels[filter].toLowerCase()} listings
+            </p>
+          ) : null}
         </div>
 
         <Link
@@ -210,31 +248,39 @@ const MyEquipmentPage = () => {
       )}
 
       {/* Empty */}
-      {!loading && !error && equipments.length === 0 && (
+      {!loading && !error && visibleEquipments.length === 0 && (
         <div className="flex flex-col items-center rounded-2xl border border-border bg-card px-6 py-16 text-center">
           <div className="mb-5 flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
             <Package className="size-7" />
           </div>
           <h2 className="text-xl font-bold text-foreground">
-            No Equipment Listed Yet
+            {filter === "all"
+              ? "No Equipment Listed Yet"
+              : `No ${filterLabels[filter]} Listings`}
           </h2>
           <p className="mt-2 max-w-sm text-sm text-muted-foreground">
-            Start earning by listing your equipment on GearNest.
+            {filter === "all"
+              ? "Start earning by listing your equipment on GearNest."
+              : "Try another filter or manage all of your equipment listings."}
           </p>
           <Link
-            href="/dashboard/owner/add-equipment"
+            href={
+              filter === "all"
+                ? "/dashboard/owner/add-equipment"
+                : "/dashboard/owner/equipment"
+            }
             className={buttonVariants({ className: "mt-6" })}
           >
-            Add Your First Equipment
+            {filter === "all" ? "Add Your First Equipment" : "View All Equipment"}
             <ArrowRight />
           </Link>
         </div>
       )}
 
       {/* List */}
-      {!loading && !error && equipments.length > 0 && (
+      {!loading && !error && visibleEquipments.length > 0 && (
         <div className="space-y-4">
-          {equipments.map((equipment) => {
+          {visibleEquipments.map((equipment) => {
             const status = getStatus(equipment);
 
             return (
@@ -392,5 +438,18 @@ const MyEquipmentPage = () => {
     </div>
   );
 };
+
+const MyEquipmentPage = () => (
+  <Suspense
+    fallback={
+      <div className="space-y-4">
+        <CardSkeleton />
+        <CardSkeleton />
+      </div>
+    }
+  >
+    <MyEquipmentPageContent />
+  </Suspense>
+);
 
 export default MyEquipmentPage;

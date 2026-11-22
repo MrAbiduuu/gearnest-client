@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, type ReactNode } from "react";
 import { AlertCircle, BarChart3, Info, RefreshCw } from "lucide-react";
 import { motion } from "motion/react";
 import {
@@ -24,14 +24,18 @@ import {
   formatCurrency,
   getChartScale,
 } from "@/components/admin/analytics-utils";
-import type { AdminMonthlyRevenueData } from "@/lib/admin-analytics-api";
+type RevenueSeriesPoint = {
+  month: string;
+  revenue: number;
+};
 
-const chartConfig = {
-  revenue: {
-    label: "Revenue",
-    color: "#16A34A",
-  },
-} satisfies ChartConfig;
+/** Structural subset shared by the admin and owner revenue API responses. */
+type RevenueChartData = {
+  year: number;
+  monthlyRevenue: RevenueSeriesPoint[];
+  currency: string;
+  currencyBreakdown: unknown[];
+};
 
 const SKELETON_MONTHS = [
   "Jan", "Feb", "Mar", "Apr", "May", "Jun",
@@ -39,19 +43,30 @@ const SKELETON_MONTHS = [
 ];
 
 type MonthlyRevenueChartProps = {
-  data: AdminMonthlyRevenueData | null;
+  data: RevenueChartData | null;
   isLoading: boolean;
   error: string | null;
   onRetry: () => void;
   reducedMotion: boolean;
+  title?: string;
+  eyebrow?: string;
+  subtitle?: string;
+  accentColor?: string;
+  eyebrowClassName?: string;
+  summaryClassName?: string;
+  summaryLabelClassName?: string;
+  summaryValueClassName?: string;
+  skeletonClassName?: string;
+  tooltipName?: string;
+  footnote?: ReactNode;
 };
 
-const ChartSkeleton = () => (
+const ChartSkeleton = ({ className }: { className: string }) => (
   <div aria-hidden="true" className="h-[280px] w-full sm:h-[320px]">
     <div className="flex h-full items-end gap-1.5 border-b border-[#EDE1D6] px-3 sm:gap-3">
       {SKELETON_MONTHS.map((month, index) => (
         <div key={`${month}-${index}`} className="flex h-full flex-1 flex-col justify-end">
-          <Skeleton className="h-[35%] w-full rounded-t-md bg-[#EAF3EC] dark:bg-stone-800" />
+          <Skeleton className={`h-[35%] w-full rounded-t-md ${className}`} />
         </div>
       ))}
     </div>
@@ -59,7 +74,7 @@ const ChartSkeleton = () => (
       {SKELETON_MONTHS.map((month, index) => (
         <Skeleton
           key={`${month}-label-${index}`}
-          className="h-3 w-6 bg-[#EAF3EC] dark:bg-stone-800"
+          className={`h-3 w-6 ${className}`}
         />
       ))}
     </div>
@@ -72,7 +87,25 @@ const MonthlyRevenueChart = ({
   error,
   onRetry,
   reducedMotion,
+  title = "Monthly Platform Revenue ($)",
+  eyebrow = "Financial performance",
+  subtitle = "Gross paid rental volume by payment date",
+  accentColor = "#16A34A",
+  eyebrowClassName = "text-green-700 dark:text-emerald-400",
+  summaryClassName = "border-green-100 bg-green-50 dark:border-green-900/60 dark:bg-green-950/20",
+  summaryLabelClassName = "text-green-700 dark:text-emerald-400",
+  summaryValueClassName = "text-green-800 dark:text-emerald-300",
+  skeletonClassName = "bg-[#EAF3EC] dark:bg-stone-800",
+  tooltipName = "Paid rental volume",
+  footnote,
 }: MonthlyRevenueChartProps) => {
+  const chartConfig = useMemo(
+    () =>
+      ({
+        revenue: { label: "Revenue", color: accentColor },
+      }) satisfies ChartConfig,
+    [accentColor],
+  );
   const monthlyRevenue = useMemo(
     () => data?.monthlyRevenue ?? [],
     [data?.monthlyRevenue],
@@ -106,25 +139,29 @@ const MonthlyRevenueChart = ({
     >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <div className="flex items-center gap-2 text-[11px] font-bold tracking-[0.16em] text-green-700 uppercase dark:text-emerald-400">
+          <div
+            className={`flex items-center gap-2 text-[11px] font-bold tracking-[0.16em] uppercase ${eyebrowClassName}`}
+          >
             <BarChart3 aria-hidden="true" className="size-3.5" />
-            Financial performance
+            {eyebrow}
           </div>
           <h2 className="mt-2 text-lg font-bold tracking-tight text-[#2E2119] dark:text-stone-100 sm:text-xl">
-            Monthly Platform Revenue ($)
+            {title}
           </h2>
           <p className="mt-1 text-xs text-[#8B7B6B] dark:text-stone-400 sm:text-sm">
-            Gross paid rental volume by payment date
+            {subtitle}
             {data ? ` · ${currency} · UTC` : ""}
           </p>
         </div>
 
         {data && totalRevenue > 0 ? (
-          <div className="rounded-xl border border-green-100 bg-green-50 px-3 py-2 text-right dark:border-green-900/60 dark:bg-green-950/20">
-            <p className="text-[10px] font-bold tracking-[0.12em] text-green-700 uppercase dark:text-emerald-400">
+          <div className={`rounded-xl border px-3 py-2 text-right ${summaryClassName}`}>
+            <p
+              className={`text-[10px] font-bold tracking-[0.12em] uppercase ${summaryLabelClassName}`}
+            >
               Selected year
             </p>
-            <p className="mt-0.5 text-sm font-extrabold text-green-800 dark:text-emerald-300">
+            <p className={`mt-0.5 text-sm font-extrabold ${summaryValueClassName}`}>
               {formatCurrency(totalRevenue, currency)}
             </p>
           </div>
@@ -133,7 +170,7 @@ const MonthlyRevenueChart = ({
 
       <div className="mt-6">
         {isLoading ? (
-          <ChartSkeleton />
+          <ChartSkeleton className={skeletonClassName} />
         ) : error ? (
           <div className="flex min-h-[280px] flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-red-200 bg-red-50/60 px-6 text-center dark:border-red-900/60 dark:bg-red-950/20">
             <AlertCircle className="size-7 text-red-500" aria-hidden="true" />
@@ -211,7 +248,7 @@ const MonthlyRevenueChart = ({
                     tick={{ fill: "#8B7B6B", fontSize: 11 }}
                   />
                   <Tooltip
-                    cursor={{ fill: "#16A34A", fillOpacity: 0.08 }}
+                    cursor={{ fill: accentColor, fillOpacity: 0.08 }}
                     contentStyle={{
                       borderRadius: 12,
                       border: "1px solid #EDE1D6",
@@ -224,15 +261,15 @@ const MonthlyRevenueChart = ({
                         typeof value === "number" ? value : Number(value);
                       return [
                         formatCurrency(numericValue, currency),
-                        "Paid rental volume",
+                        tooltipName,
                       ];
                     }}
                   />
                   <Bar
                     key={`revenue-${data.year}-${totalRevenue}`}
                     dataKey="revenue"
-                    name="Paid rental volume"
-                    fill="#16A34A"
+                    name={tooltipName}
+                    fill={accentColor}
                     radius={[6, 6, 0, 0]}
                     maxBarSize={42}
                     isAnimationActive={!reducedMotion}
@@ -244,10 +281,14 @@ const MonthlyRevenueChart = ({
             </motion.div>
 
             <p className="mt-4 text-[11px] leading-5 text-[#9A8A79] dark:text-stone-500">
-              {formatCount(data.currencyBreakdown.length)} actual payment{" "}
-              {data.currencyBreakdown.length === 1 ? "currency" : "currencies"}{" "}
-              found. Duplicate Stripe sessions are excluded. No platform
-              commission is recorded, so this is gross paid rental volume.
+              {footnote ?? (
+                <>
+                  {formatCount(data.currencyBreakdown.length)} actual payment{" "}
+                  {data.currencyBreakdown.length === 1 ? "currency" : "currencies"}{" "}
+                  found. Duplicate Stripe sessions are excluded. No platform
+                  commission is recorded, so this is gross paid rental volume.
+                </>
+              )}
             </p>
           </>
         )}
