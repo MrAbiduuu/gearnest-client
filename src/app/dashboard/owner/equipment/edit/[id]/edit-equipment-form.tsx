@@ -225,9 +225,11 @@ const EditEquipmentForm = () => {
       !Number.isFinite(form.rentalRate) ||
       form.rentalRate <= 0 ||
       !Number.isInteger(form.availableStock) ||
-      form.availableStock < 1
+      form.availableStock < 0
     ) {
-      setError("Rental price and available quantity must be valid positive numbers.");
+      setError(
+        "Rental price must be positive and available quantity cannot be negative.",
+      );
       return;
     }
 
@@ -462,7 +464,7 @@ const EditEquipmentForm = () => {
                 <input
                   id="edit-stock"
                   type="number"
-                  min="1"
+                  min="0"
                   step="1"
                   value={form.availableStock}
                   onChange={setNumber("availableStock")}
