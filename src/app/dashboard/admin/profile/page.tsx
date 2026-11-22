@@ -341,10 +341,10 @@ const AdminProfilePage = () => {
                         <p className="truncate text-sm font-medium text-foreground">
                           {isUploading
                             ? "Uploading photo..."
-                            : "Or upload to ImgBB"}
+                            : "Upload from your device"}
                         </p>
                         <p className="mt-0.5 text-xs text-muted-foreground">
-                          PNG, JPG or JPEG
+                          JPEG, PNG, WEBP or GIF · up to 10MB
                         </p>
                       </div>
                     </label>

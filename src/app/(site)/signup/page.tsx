@@ -375,7 +375,7 @@ const SignUpPage = () => {
                   type="url"
                   value={photoUrl}
                   onChange={(event) => setPhotoUrl(event.target.value)}
-                  placeholder="https://example.com/your-photo.jpg (optional)"
+                  placeholder="https://example.com/your-photo.jpg"
                   className={inputClassName}
                 />
 
