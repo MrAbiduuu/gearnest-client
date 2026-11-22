@@ -1,4 +1,5 @@
 import { auth } from "@/lib/auth";
+import { authFetch } from "@/lib/server";
 import {
   getEquipmentApiBaseUrl,
   unwrapApiData,
@@ -39,7 +40,7 @@ export async function GET(request: Request) {
 
   try {
     // Owners need pending and rejected submissions as well as approved ones.
-    const backendResponse = await fetch(
+    const backendResponse = await authFetch(
       `${getEquipmentApiBaseUrl()}/equipments?status=all`,
       {
         cache: "no-store",
@@ -122,7 +123,7 @@ export async function POST(request: Request) {
   };
 
   try {
-    const backendResponse = await fetch(`${getEquipmentApiBaseUrl()}/equipments`, {
+    const backendResponse = await authFetch(`${getEquipmentApiBaseUrl()}/equipments`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),

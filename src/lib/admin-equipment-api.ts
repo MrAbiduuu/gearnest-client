@@ -1,9 +1,9 @@
 /**
- * Admin-only equipment moderation helper. The Better Auth session cookie is
- * sent to the Express backend, which re-checks the admin role before writing.
+ * Admin-only equipment moderation helper. Calls go through the Next.js backend
+ * proxy, which attaches a short-lived JWT; Express re-checks the admin role.
  */
+import { authenticatedFetch } from "@/lib/authenticated-api";
 import type { Equipment, EquipmentStatus } from "@/lib/equipment";
-import { getEquipmentApiBaseUrl } from "@/lib/equipment";
 
 type ModerationResponse = {
   success: boolean;
@@ -34,8 +34,8 @@ export async function updateAdminEquipmentStatus(
   id: string,
   status: EquipmentStatus,
 ): Promise<Equipment> {
-  const response = await fetch(
-    `${getEquipmentApiBaseUrl()}/admin/equipments/${encodeURIComponent(id)}/status`,
+  const response = await authenticatedFetch(
+    `/admin/equipments/${encodeURIComponent(id)}/status`,
     {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },

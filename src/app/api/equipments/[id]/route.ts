@@ -1,4 +1,5 @@
 import { auth } from "@/lib/auth";
+import { authFetch } from "@/lib/server";
 import {
   getEquipmentApiBaseUrl,
   unwrapApiData,
@@ -58,7 +59,7 @@ const loadOwnedEquipment = async (
   let backendResponse: Response;
 
   try {
-    backendResponse = await fetch(
+    backendResponse = await authFetch(
       `${getEquipmentApiBaseUrl()}/equipments/${encodeURIComponent(id)}`,
       { cache: "no-store" },
     );
@@ -146,7 +147,7 @@ export async function PATCH(request: Request, { params }: RouteContext) {
   }
 
   try {
-    const backendResponse = await fetch(
+    const backendResponse = await authFetch(
       `${getEquipmentApiBaseUrl()}/equipments/${encodeURIComponent(id)}`,
       {
         method: "PATCH",
@@ -188,7 +189,7 @@ export async function DELETE(request: Request, { params }: RouteContext) {
   if (error) return error;
 
   try {
-    const backendResponse = await fetch(
+    const backendResponse = await authFetch(
       `${getEquipmentApiBaseUrl()}/equipments/${encodeURIComponent(id)}`,
       { method: "DELETE" },
     );

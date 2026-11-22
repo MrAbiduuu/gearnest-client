@@ -1,11 +1,11 @@
 /**
  * Client helpers for the customer-scoped dashboard endpoints on the Express
- * API. The backend derives the customer from the verified Better Auth session,
- * so the browser never sends a customer ID.
+ * API. The Next.js proxy attaches a short-lived JWT from the Better Auth
+ * session, and the backend derives the customer from the verified identity.
  */
-import { getEquipmentApiBaseUrl } from "@/lib/equipment";
+import { authenticatedFetch } from "@/lib/authenticated-api";
 
-const CUSTOMER_DASHBOARD_BASE_URL = `${getEquipmentApiBaseUrl()}/customer/dashboard`;
+const CUSTOMER_DASHBOARD_BASE_PATH = "/customer/dashboard";
 
 export type CustomerBookingStatus = "pending" | "confirmed" | "cancelled";
 export type CustomerBookingPeriod = "3months" | "6months" | "12months";
@@ -135,7 +135,7 @@ const request = async <T>(
   fallback: string,
   signal?: AbortSignal,
 ): Promise<T> => {
-  const response = await fetch(`${CUSTOMER_DASHBOARD_BASE_URL}${path}`, {
+  const response = await authenticatedFetch(`${CUSTOMER_DASHBOARD_BASE_PATH}${path}`, {
     signal,
     credentials: "include",
     cache: "no-store",

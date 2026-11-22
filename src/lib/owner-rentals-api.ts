@@ -1,14 +1,14 @@
 /**
  * Client helpers for owner-scoped rental requests.
  *
- * The Express backend verifies the Better Auth session and owner role on every
- * call. It derives the owner from the verified session email and joins each
- * purchase back to that owner's equipment; no client-supplied owner ID exists.
+ * The Next.js proxy attaches a short-lived JWT, and the Express backend
+ * verifies it plus the owner role on every call. It derives the owner from the
+ * verified identity and joins each purchase back to that owner's equipment.
  */
+import { authenticatedFetch } from "@/lib/authenticated-api";
 import type { BookingPaymentStatus, BookingStatus } from "@/lib/booking-types";
-import { getEquipmentApiBaseUrl } from "@/lib/equipment";
 
-const RENTALS_BASE_URL = `${getEquipmentApiBaseUrl()}/owner/rentals`;
+const RENTALS_BASE_PATH = "/owner/rentals";
 
 export type { BookingStatus, BookingPaymentStatus as PaymentStatus };
 export type OwnerRentalStatus = BookingStatus;
@@ -146,7 +146,7 @@ export async function fetchOwnerRentals(
     sort: query.sort ?? "newest",
   });
 
-  const response = await fetch(`${RENTALS_BASE_URL}?${params}`, {
+  const response = await authenticatedFetch(`${RENTALS_BASE_PATH}?${params}`, {
     signal,
     credentials: "include",
     cache: "no-store",
@@ -165,7 +165,7 @@ export async function fetchOwnerRentals(
 export async function fetchOwnerRentalStats(
   signal?: AbortSignal,
 ): Promise<RentalStatistics> {
-  const response = await fetch(`${RENTALS_BASE_URL}/stats`, {
+  const response = await authenticatedFetch(`${RENTALS_BASE_PATH}/stats`, {
     signal,
     credentials: "include",
     cache: "no-store",
@@ -185,8 +185,8 @@ export async function updateOwnerRentalStatus(
   id: string,
   status: OwnerRentalStatus,
 ): Promise<RentalBooking> {
-  const response = await fetch(
-    `${RENTALS_BASE_URL}/${encodeURIComponent(id)}/status`,
+  const response = await authenticatedFetch(
+    `${RENTALS_BASE_PATH}/${encodeURIComponent(id)}/status`,
     {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },

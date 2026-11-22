@@ -5,9 +5,9 @@
  * then aggregates MongoDB server-side. The browser never fetches whole
  * collections to calculate platform statistics.
  */
-import { getEquipmentApiBaseUrl } from "@/lib/equipment";
+import { authenticatedFetch } from "@/lib/authenticated-api";
 
-const ANALYTICS_BASE_URL = `${getEquipmentApiBaseUrl()}/admin/analytics`;
+const ANALYTICS_BASE_PATH = "/admin/analytics";
 
 export type UserRole = "customer" | "owner" | "admin";
 export type BookingStatus = "pending" | "confirmed" | "cancelled";
@@ -139,7 +139,7 @@ const getErrorMessage = async (
 export async function fetchAdminAnalytics(
   signal?: AbortSignal,
 ): Promise<AdminAnalyticsResponse> {
-  const response = await fetch(ANALYTICS_BASE_URL, {
+  const response = await authenticatedFetch(ANALYTICS_BASE_PATH, {
     signal,
     credentials: "include",
     cache: "no-store",
@@ -160,7 +160,7 @@ export async function fetchAdminMonthlyBookings(
   signal?: AbortSignal,
 ): Promise<AdminMonthlyBookingsResponse> {
   const query = new URLSearchParams({ year: String(year) });
-  const response = await fetch(`${ANALYTICS_BASE_URL}/monthly-bookings?${query}`, {
+  const response = await authenticatedFetch(`${ANALYTICS_BASE_PATH}/monthly-bookings?${query}`, {
     signal,
     credentials: "include",
     cache: "no-store",
@@ -181,8 +181,8 @@ export async function fetchAdminMonthlyRevenue(
   signal?: AbortSignal,
 ): Promise<AdminMonthlyRevenueResponse> {
   const query = new URLSearchParams({ year: String(year) });
-  const response = await fetch(
-    `${ANALYTICS_BASE_URL}/monthly-revenue?${query}`,
+  const response = await authenticatedFetch(
+    `${ANALYTICS_BASE_PATH}/monthly-revenue?${query}`,
     {
       signal,
       credentials: "include",

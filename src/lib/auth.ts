@@ -7,8 +7,24 @@ import { jwt } from "better-auth/plugins";
 const client = new MongoClient(process.env.MONGODB_URI as string);
 export const db = client.db("gearnestdb");
 
+const jwtIssuer = process.env.JWT_ISSUER ?? "gearnest";
+const jwtAudience = process.env.JWT_AUDIENCE ?? "gearnest-api";
+
 export const auth = betterAuth({
-  plugins: [jwt()],
+  plugins: [
+    jwt({
+      jwt: {
+        issuer: jwtIssuer,
+        audience: jwtAudience,
+        expirationTime: "15m",
+        definePayload: ({ user }) => ({
+          name: user.name,
+          email: user.email,
+          role: user.role ?? "customer",
+        }),
+      },
+    }),
+  ],
   emailAndPassword: {
     enabled: true,
   },

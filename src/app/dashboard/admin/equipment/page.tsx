@@ -25,7 +25,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/components/ui/toast";
 import { updateAdminEquipmentStatus } from "@/lib/admin-equipment-api";
 import {
-  fetchEquipments,
+  fetchEquipmentsForManagement,
   type Equipment,
   type EquipmentStatus,
 } from "@/lib/equipment";
@@ -273,7 +273,7 @@ const AllEquipmentPage = () => {
     setError("");
 
     try {
-      const data = await fetchEquipments(signal, { status: "all" });
+      const data = await fetchEquipmentsForManagement(signal);
       setEquipments(data);
     } catch (loadError) {
       if (signal?.aborted) return;

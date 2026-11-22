@@ -5,10 +5,10 @@
  * call. Search, filtering, counting, and related-record lookups all happen in
  * MongoDB; the browser only renders the returned page of bookings.
  */
+import { authenticatedFetch } from "@/lib/authenticated-api";
 import type { BookingPaymentStatus, BookingStatus } from "@/lib/booking-types";
-import { getEquipmentApiBaseUrl } from "@/lib/equipment";
 
-const BOOKINGS_BASE_URL = `${getEquipmentApiBaseUrl()}/admin/bookings`;
+const BOOKINGS_BASE_PATH = "/admin/bookings";
 
 export type AdminBookingStatusFilter = "all" | BookingStatus;
 
@@ -113,7 +113,7 @@ export async function fetchAdminBookings(
     sort: query.sort ?? "newest",
   });
 
-  const response = await fetch(`${BOOKINGS_BASE_URL}?${params}`, {
+  const response = await authenticatedFetch(`${BOOKINGS_BASE_PATH}?${params}`, {
     signal,
     credentials: "include",
     cache: "no-store",
@@ -134,8 +134,8 @@ export async function updateAdminBookingStatus(
   id: string,
   status: BookingStatus,
 ): Promise<AdminBooking> {
-  const response = await fetch(
-    `${BOOKINGS_BASE_URL}/${encodeURIComponent(id)}/status`,
+  const response = await authenticatedFetch(
+    `${BOOKINGS_BASE_PATH}/${encodeURIComponent(id)}/status`,
     {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },

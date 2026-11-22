@@ -4,9 +4,9 @@
  * The backend derives the owner from the verified Better Auth session, so the
  * browser never sends an owner ID and cannot request another owner's data.
  */
-import { getEquipmentApiBaseUrl } from "@/lib/equipment";
+import { authenticatedFetch } from "@/lib/authenticated-api";
 
-const OWNER_DASHBOARD_BASE_URL = `${getEquipmentApiBaseUrl()}/owner/dashboard`;
+const OWNER_DASHBOARD_BASE_PATH = "/owner/dashboard";
 
 export type OwnerEquipmentStatus = "approved" | "pending" | "rejected";
 export type OwnerBookingStatus = "pending" | "confirmed" | "cancelled";
@@ -143,7 +143,7 @@ const getErrorMessage = async (
 export async function fetchOwnerDashboardOverview(
   signal?: AbortSignal,
 ): Promise<OwnerDashboardOverview> {
-  const response = await fetch(`${OWNER_DASHBOARD_BASE_URL}/overview`, {
+  const response = await authenticatedFetch(`${OWNER_DASHBOARD_BASE_PATH}/overview`, {
     signal,
     credentials: "include",
     cache: "no-store",
@@ -164,8 +164,8 @@ export async function fetchOwnerDashboardMonthlyBookings(
   signal?: AbortSignal,
 ): Promise<OwnerMonthlyBookingsData> {
   const query = new URLSearchParams({ year: String(year) });
-  const response = await fetch(
-    `${OWNER_DASHBOARD_BASE_URL}/monthly-bookings?${query}`,
+  const response = await authenticatedFetch(
+    `${OWNER_DASHBOARD_BASE_PATH}/monthly-bookings?${query}`,
     {
       signal,
       credentials: "include",
@@ -188,8 +188,8 @@ export async function fetchOwnerDashboardRevenue(
   signal?: AbortSignal,
 ): Promise<OwnerMonthlyRevenueData> {
   const query = new URLSearchParams({ year: String(year) });
-  const response = await fetch(
-    `${OWNER_DASHBOARD_BASE_URL}/revenue?${query}`,
+  const response = await authenticatedFetch(
+    `${OWNER_DASHBOARD_BASE_PATH}/revenue?${query}`,
     {
       signal,
       credentials: "include",

@@ -13,8 +13,13 @@ import type {
   BookingStatus,
   CustomerBooking,
 } from "@/lib/booking-types";
-import { fetchEquipments } from "@/lib/equipment";
+import {
+  getEquipmentApiBaseUrl,
+  unwrapApiData,
+  type Equipment,
+} from "@/lib/equipment";
 import { inclusiveDayCount } from "@/lib/rental-pricing";
+import { authFetch } from "@/lib/server";
 
 type PurchaseBookingDocument = {
   _id?: ObjectId;
@@ -69,11 +74,18 @@ export const getCustomerBookings = async (
 
   if (documents.length === 0) return [];
 
-  let equipments = [] as Awaited<ReturnType<typeof fetchEquipments>>;
+  let equipments: Equipment[] = [];
   try {
     // Booking history must keep its equipment name even if the listing is
     // later pending or rejected on the public catalog.
-    equipments = await fetchEquipments(undefined, { status: "all" });
+    const response = await authFetch(
+      `${getEquipmentApiBaseUrl()}/equipments?status=all`,
+      { cache: "no-store" },
+    );
+    if (!response.ok) {
+      throw new Error(`Equipment API responded with ${response.status}`);
+    }
+    equipments = unwrapApiData(await response.json()) as Equipment[];
   } catch (error) {
     // Keep the history usable with IDs if the equipment service is offline.
     console.error("Could not load equipment for booking history", error);

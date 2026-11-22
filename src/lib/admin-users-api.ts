@@ -1,10 +1,9 @@
 /**
  * Client helper for the admin-only user management API on the Express backend.
- * The Better Auth session cookie is sent with every request (credentials are
- * never proxied through the URL or a header), and authorization is enforced
- * again by the backend on every call.
+ * Calls go through the Next.js backend proxy, which attaches a short-lived JWT
+ * from the HttpOnly Better Auth session. Authorization is re-checked on Express.
  */
-import { getEquipmentApiBaseUrl } from "@/lib/equipment";
+import { authenticatedFetch } from "@/lib/authenticated-api";
 
 export type UserRole = "customer" | "owner" | "admin";
 export type UserRoleFilter = "all" | UserRole;
@@ -59,8 +58,6 @@ const getMessage = async (
   return payload?.message ?? fallback;
 };
 
-const apiUrl = (path: string) => `${getEquipmentApiBaseUrl()}${path}`;
-
 export async function fetchAdminUsers(
   params: {
     role: UserRoleFilter;
@@ -77,7 +74,7 @@ export async function fetchAdminUsers(
     limit: String(params.limit),
   });
 
-  const response = await fetch(apiUrl(`/users?${query.toString()}`), {
+  const response = await authenticatedFetch(`/users?${query.toString()}`, {
     signal,
     credentials: "include",
     cache: "no-store",
@@ -97,12 +94,15 @@ export async function updateAdminUserRole(
   userId: string,
   role: UserRole,
 ): Promise<{ message: string; user: AdminUser | null }> {
-  const response = await fetch(apiUrl(`/users/${encodeURIComponent(userId)}/role`), {
-    method: "PATCH",
-    credentials: "include",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({ role }),
-  });
+  const response = await authenticatedFetch(
+    `/users/${encodeURIComponent(userId)}/role`,
+    {
+      method: "PATCH",
+      credentials: "include",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ role }),
+    },
+  );
 
   const payload = (await response.json().catch(() => null)) as {
     message?: string;
@@ -125,10 +125,13 @@ export async function updateAdminUserRole(
 export async function deleteAdminUser(
   userId: string,
 ): Promise<{ message: string }> {
-  const response = await fetch(apiUrl(`/users/${encodeURIComponent(userId)}`), {
-    method: "DELETE",
-    credentials: "include",
-  });
+  const response = await authenticatedFetch(
+    `/users/${encodeURIComponent(userId)}`,
+    {
+      method: "DELETE",
+      credentials: "include",
+    },
+  );
 
   const payload = (await response.json().catch(() => null)) as {
     message?: string;

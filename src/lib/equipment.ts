@@ -9,6 +9,7 @@
  * required. A few optional fields are included so the UI can take advantage
  * of them if the backend adds them later.
  */
+import { authenticatedFetch } from "@/lib/authenticated-api";
 
 export type EquipmentOwner = {
   name?: string;
@@ -87,6 +88,31 @@ export async function fetchEquipments(
   // { success, message, data } wrapper is removed later.
   const equipments = unwrapApiData(await response.json());
 
+  if (!Array.isArray(equipments)) {
+    throw new Error("The equipment API returned an unexpected response.");
+  }
+
+  return equipments as Equipment[];
+}
+
+/**
+ * Fetches every equipment status through the JWT-backed backend proxy.
+ * Use only for admin/owner management views, never the public catalog.
+ */
+export async function fetchEquipmentsForManagement(
+  signal?: AbortSignal,
+): Promise<Equipment[]> {
+  const response = await authenticatedFetch("/equipments?status=all", {
+    signal,
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      `Could not load managed equipment (status ${response.status}).`,
+    );
+  }
+
+  const equipments = unwrapApiData(await response.json());
   if (!Array.isArray(equipments)) {
     throw new Error("The equipment API returned an unexpected response.");
   }
