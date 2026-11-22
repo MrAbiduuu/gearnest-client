@@ -2,11 +2,13 @@ import { betterAuth } from "better-auth";
 import { createAuthMiddleware } from "better-auth/api";
 import { MongoClient } from "mongodb";
 import { mongodbAdapter } from "@better-auth/mongo-adapter";
+import { jwt } from "better-auth/plugins";
 
 const client = new MongoClient(process.env.MONGODB_URI as string);
 export const db = client.db("gearnestdb");
 
 export const auth = betterAuth({
+  plugins: [jwt()],
   emailAndPassword: {
     enabled: true,
   },

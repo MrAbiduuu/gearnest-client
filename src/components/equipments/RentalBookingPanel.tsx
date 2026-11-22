@@ -4,6 +4,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
+  AlertCircle,
   ArrowRight,
   CalendarDays,
   CheckCircle2,
@@ -18,7 +19,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
 import { useSession } from "@/lib/auth-client";
-import type { Equipment } from "@/lib/equipment";
+import { getAvailableStock, type Equipment } from "@/lib/equipment";
 import { formatRentalRate } from "@/lib/equipment-filters";
 import { checkPurchaseStatus } from "@/lib/purchases-api";
 import {
@@ -70,7 +71,7 @@ const RentalBookingPanel = ({
   const { data: session, isPending } = useSession();
   const user = session?.user;
 
-  const stock = Math.max(0, Math.floor(equipment.availableStock ?? 0));
+  const stock = getAvailableStock(equipment);
   const isAvailable = stock > 0;
   const maxQuantity = Math.max(1, stock);
   const rate = Number.isFinite(equipment.rentalRate) ? equipment.rentalRate : 0;
@@ -229,7 +230,7 @@ const RentalBookingPanel = ({
           {!isAvailable ? (
             <div className="rounded-lg border border-border bg-muted/60 p-3 text-xs leading-5 text-muted-foreground">
               <p className="font-semibold text-foreground">
-                Currently out of stock
+                Item out of stock
               </p>
               <p className="mt-1">
                 This equipment cannot be booked right now.{" "}
@@ -533,7 +534,12 @@ const RentalBookingPanel = ({
             }
             className="mt-4 h-12 w-full bg-green-700 font-semibold text-white shadow-md shadow-green-900/15 transition hover:bg-green-800 disabled:cursor-not-allowed dark:bg-lime-500 dark:text-[#052e16] dark:hover:bg-lime-400"
           >
-            {isPurchased ? (
+            {!isAvailable ? (
+              <>
+                <AlertCircle className="size-4" aria-hidden="true" />
+                Item out of stock
+              </>
+            ) : isPurchased ? (
               <>
                 <CheckCircle2 className="size-4" aria-hidden="true" />
                 Checkout completed

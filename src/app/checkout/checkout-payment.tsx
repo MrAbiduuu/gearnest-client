@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
+  AlertCircle,
   ArrowRight,
   CreditCard,
   CalendarDays,
@@ -16,7 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/toast";
 import { useSession } from "@/lib/auth-client";
-import type { Equipment } from "@/lib/equipment";
+import { getAvailableStock, type Equipment } from "@/lib/equipment";
 import { formatRentalRate } from "@/lib/equipment-filters";
 import type { RentalQuote } from "@/lib/rental-pricing";
 
@@ -72,8 +73,20 @@ const CheckoutPayment = ({
   const [submitting, setSubmitting] = useState(false);
 
   const total = formatMoney(quote.rentalCost);
+  const stock = getAvailableStock(equipment);
+  const isOutOfStock = stock <= 0;
 
   const handlePay = async () => {
+    if (isOutOfStock) {
+      toast.add({
+        type: "error",
+        title: "Item out of stock",
+        description: "Checkout is disabled while this equipment is unavailable.",
+        timeout: 5000,
+      });
+      return;
+    }
+
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
       toast.add({
         type: "error",
@@ -233,24 +246,47 @@ const CheckoutPayment = ({
               </div>
             </div>
 
+            {isOutOfStock ? (
+              <div
+                role="alert"
+                className="flex items-start gap-2.5 rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 text-xs leading-5 text-red-700"
+              >
+                <AlertCircle className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+                <span>
+                  <strong className="font-semibold">Item out of stock.</strong>{" "}
+                  Checkout is disabled for this equipment.
+                </span>
+              </div>
+            ) : null}
+
             <Button
               type="button"
               onClick={() => void handlePay()}
-              disabled={submitting || isSessionPending}
-              className="h-12 w-full rounded-lg bg-[#635bff] text-sm font-bold text-white transition hover:bg-[#5148e8] disabled:cursor-wait disabled:opacity-60"
+              disabled={submitting || isSessionPending || isOutOfStock}
+              className="h-12 w-full rounded-lg bg-[#635bff] text-sm font-bold text-white transition hover:bg-[#5148e8] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {submitting ? (
+              {isOutOfStock ? (
+                <AlertCircle className="size-4" aria-hidden="true" />
+              ) : submitting ? (
                 <Loader2 className="size-4 animate-spin" aria-hidden="true" />
               ) : (
                 <LockKeyhole className="size-4" aria-hidden="true" />
               )}
-              {submitting ? "Redirecting to Stripe…" : `Pay ${total}`}
-              {!submitting ? <ArrowRight className="size-4" aria-hidden="true" /> : null}
+              {isOutOfStock
+                ? "Item out of stock"
+                : submitting
+                  ? "Redirecting to Stripe…"
+                  : `Pay ${total}`}
+              {!submitting && !isOutOfStock ? (
+                <ArrowRight className="size-4" aria-hidden="true" />
+              ) : null}
             </Button>
 
-            <p className="text-center text-[11px] leading-5 text-[#8792a2]">
-              You&apos;ll be redirected to Stripe to complete your payment.
-            </p>
+            {!isOutOfStock ? (
+              <p className="text-center text-[11px] leading-5 text-[#8792a2]">
+                You&apos;ll be redirected to Stripe to complete your payment.
+              </p>
+            ) : null}
           </div>
         </section>
 

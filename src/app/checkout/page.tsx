@@ -2,7 +2,7 @@ import Link from "next/link";
 import { headers } from "next/headers";
 import { ArrowLeft, PackageSearch } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { fetchEquipmentById } from "@/lib/equipment";
+import { fetchEquipmentById, getAvailableStock } from "@/lib/equipment";
 import {
   getSessionUserIdFromHeaders,
   hasPurchasedEquipment,
@@ -24,9 +24,11 @@ const firstValue = (value: string | string[] | undefined) =>
 const CheckoutProblem = ({
   title,
   description,
+  showDisabledCheckout = false,
 }: {
   title: string;
   description: string;
+  showDisabledCheckout?: boolean;
 }) => (
   <main className="flex min-h-[70vh] items-center justify-center bg-background px-4 py-12">
     <div className="w-full max-w-md rounded-2xl border border-border bg-card px-6 py-12 text-center shadow-sm">
@@ -36,14 +38,24 @@ const CheckoutProblem = ({
       />
       <h1 className="mt-5 text-xl font-bold text-foreground">{title}</h1>
       <p className="mt-2 text-sm leading-6 text-muted-foreground">{description}</p>
-      <Button
-        render={<Link href="/equipment" />}
-        nativeButton={false}
-        className="mt-6 bg-[#166534] text-white hover:bg-[#14532D]"
-      >
-        <ArrowLeft aria-hidden="true" />
-        Browse equipment
-      </Button>
+      <div className="mt-6 flex flex-col gap-3">
+        {showDisabledCheckout ? (
+          <Button
+            disabled
+            className="cursor-not-allowed opacity-60"
+          >
+            Checkout unavailable
+          </Button>
+        ) : null}
+        <Button
+          render={<Link href="/equipment" />}
+          nativeButton={false}
+          className="bg-[#166534] text-white hover:bg-[#14532D]"
+        >
+          <ArrowLeft aria-hidden="true" />
+          Browse equipment
+        </Button>
+      </div>
     </div>
   </main>
 );
@@ -97,6 +109,27 @@ const CheckoutPage = async ({ searchParams }: CheckoutPageProps) => {
       <CheckoutProblem
         title="Equipment unavailable"
         description="This listing is no longer available. Please choose another item."
+      />
+    );
+  }
+
+  const stock = getAvailableStock(equipment);
+  if (stock <= 0) {
+    return (
+      <CheckoutProblem
+        title="Item out of stock"
+        description="This equipment is currently out of stock, so checkout is disabled. Please browse other equipment."
+        showDisabledCheckout
+      />
+    );
+  }
+
+  if (quantity > stock) {
+    return (
+      <CheckoutProblem
+        title="Requested quantity unavailable"
+        description={`Only ${stock} ${stock === 1 ? "unit is" : "units are"} available for this equipment. Please update your rental request.`}
+        showDisabledCheckout
       />
     );
   }

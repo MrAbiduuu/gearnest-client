@@ -43,6 +43,14 @@ export type Equipment = {
   createdAt?: string;
 };
 
+/** Normalize the stock field from the API into a non-negative integer. */
+export const getAvailableStock = (
+  equipment: Pick<Equipment, "availableStock">,
+) => {
+  const value = Number(equipment.availableStock ?? 0);
+  return Number.isFinite(value) ? Math.max(0, Math.floor(value)) : 0;
+};
+
 const DEFAULT_API_BASE_URL = "http://localhost:5000";
 
 export const getEquipmentApiBaseUrl = () =>

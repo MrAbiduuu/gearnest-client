@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import Navbar from "@/components/shared/navbar";
 import { FavoritesProvider } from "@/components/favorites/FavoritesProvider";
@@ -22,14 +23,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       suppressHydrationWarning
       className={`${plusJakartaSans.className} h-full antialiased`}
     >
-      <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem("theme");var d=t==="dark";document.documentElement.classList.toggle("dark",d);document.documentElement.setAttribute("data-theme",d?"dark":"light")}catch(e){}})()`,
-          }}
-        />
-      </head>
       <body className="flex min-h-svh flex-col">
+        <Script id="theme-init" strategy="beforeInteractive">
+          {`(function(){try{var t=localStorage.getItem("theme");var d=t==="dark";document.documentElement.classList.toggle("dark",d);document.documentElement.setAttribute("data-theme",d?"dark":"light")}catch(e){}})()`}
+        </Script>
         <Navbar />
         <Toaster>
           <FavoritesProvider>{children}</FavoritesProvider>

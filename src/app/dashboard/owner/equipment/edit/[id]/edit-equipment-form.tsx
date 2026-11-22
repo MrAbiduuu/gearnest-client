@@ -149,12 +149,13 @@ const EditEquipmentForm = () => {
     return () => controller.abort();
   }, [id]);
 
-  const setField =
-    <K extends keyof EquipmentInput>(field: K, value: EquipmentInput[K]) =>
-    () => {
-      setForm((previous) => ({ ...previous, [field]: value }));
-      setError("");
-    };
+  const setField = <K extends keyof EquipmentInput>(
+    field: K,
+    value: EquipmentInput[K],
+  ) => {
+    setForm((previous) => ({ ...previous, [field]: value }));
+    setError("");
+  };
 
   const setText =
     (field: Exclude<keyof EquipmentInput, "imageUrls">) =>

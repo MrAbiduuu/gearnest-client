@@ -266,6 +266,21 @@ const MyBookingsPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [activeFilter, setActiveFilter] = useState<FilterKey>("all");
 
+  // Status summary cards link here with ?status=pending|confirmed|cancelled.
+  useEffect(() => {
+    const requestedStatus = new URLSearchParams(window.location.search).get(
+      "status",
+    );
+    if (
+      requestedStatus === "pending" ||
+      requestedStatus === "confirmed" ||
+      requestedStatus === "cancelled"
+    ) {
+      // Defer the update so effects do not update state synchronously.
+      queueMicrotask(() => setActiveFilter(requestedStatus));
+    }
+  }, []);
+
   const load = useCallback(
     async (signal?: AbortSignal) => {
       if (!userId) {
